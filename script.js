@@ -1,1466 +1,1129 @@
-* {
-    margin: 0;
-    padding: 0;
-    box- sizing: border - box;
-}
-
-:root {
-    --bg: #07111f;
-    --bg2: #0a1627;
-    --panel: #0d1c30;
-    --panel2: #10243c;
-
-    --border: rgba(255, 255, 255, 0.08);
-
-    --text: #e9f2ff;
-    --muted: #8193aa;
-
-    --blue: #36a9ff;
-    --cyan: #36e0ff;
-    --green: #35df8b;
-    --red: #ff536b;
-    --yellow: #ffc857;
-
-    --shadow:
-    0 20px 50px rgba(0, 0, 0, 0.35);
-}
-
-body {
-    min - height: 100vh;
-
-    font - family:
-    Inter,
-        Segoe UI,
-            Arial,
-            sans - serif;
-
-    color: var(--text);
-
-    background:
-    radial - gradient(
-        circle at 70 % 10 %,
-        rgba(40, 120, 255, 0.10),
-        transparent 30 %
-        ),
-        radial - gradient(
-            circle at 20 % 80 %,
-            rgba(0, 220, 255, 0.05),
-            transparent 30 %
-        ),
-        var(--bg);
-
-    overflow - x: hidden;
-}
+/* =========================================================
+   NETWORK TOPOLOGY INTERACTIVE SIMULATOR
+   ========================================================= */
 
 
-/* ================= HEADER ================= */
+/* ================= DEVICE DATABASE ================= */
 
-.topbar {
-    height: 76px;
+const devices = {
 
-    padding: 0 28px;
+    router: {
+        name: "Router",
+        type: "NETWORK ROUTER",
+        icon: "R",
+        ip: "192.168.1.1",
+        mac: "AA:BB:CC:DD:EE:01",
+        connection: "Ethernet",
+        description:
+            "Router berfungsi sebagai gateway yang menghubungkan jaringan lokal dengan jaringan lain."
+    },
 
-    display: flex;
-    align - items: center;
-    justify - content: space - between;
+    switch: {
+        name: "Switch",
+        type: "NETWORK SWITCH",
+        icon: "S",
+        ip: "192.168.1.2",
+        mac: "AA:BB:CC:DD:EE:02",
+        connection: "Ethernet",
+        description:
+            "Switch menghubungkan beberapa perangkat dalam jaringan lokal dan meneruskan data ke perangkat tujuan."
+    },
 
-    border - bottom: 1px solid var(--border);
+    pc1: {
+        name: "PC 01",
+        type: "CLIENT COMPUTER",
+        icon: "PC",
+        ip: "192.168.1.10",
+        mac: "AA:BB:CC:DD:EE:10",
+        connection: "Ethernet",
+        description:
+            "PC 01 merupakan perangkat client yang digunakan untuk mengakses layanan jaringan."
+    },
 
-    background:
-    rgba(5, 15, 28, 0.85);
+    pc2: {
+        name: "PC 02",
+        type: "CLIENT COMPUTER",
+        icon: "PC",
+        ip: "192.168.1.11",
+        mac: "AA:BB:CC:DD:EE:11",
+        connection: "Ethernet",
+        description:
+            "PC 02 merupakan perangkat client yang terhubung ke jaringan lokal melalui switch."
+    },
 
-    backdrop - filter: blur(15px);
-}
+    server: {
+        name: "Server",
+        type: "DATA SERVER",
+        icon: "SRV",
+        ip: "192.168.1.100",
+        mac: "AA:BB:CC:DD:EE:20",
+        connection: "Ethernet",
+        description:
+            "Server menyediakan layanan dan data yang dapat diakses oleh perangkat client dalam jaringan."
+    },
 
-
-.brand {
-    display: flex;
-    align - items: center;
-    gap: 13px;
-}
-
-
-.brand - icon {
-    width: 42px;
-    height: 42px;
-
-    display: flex;
-    align - items: center;
-    justify - content: center;
-
-    border - radius: 12px;
-
-    color: white;
-
-    font - size: 26px;
-
-    background:
-    linear - gradient(
-        135deg,
-            #1475ff,
-            #1edcff
-    );
-
-    box - shadow:
-    0 8px 25px rgba(0, 150, 255, 0.25);
-}
-
-
-.brand h1 {
-    font - size: 15px;
-    letter - spacing: 2px;
-}
-
-
-.brand span {
-    display: block;
-
-    margin - top: 4px;
-
-    color: var(--muted);
-
-    font - size: 10px;
-
-    letter - spacing: 1.5px;
-}
-
-
-.header - status {
-    display: flex;
-    align - items: center;
-    gap: 8px;
-
-    font - size: 11px;
-    font - weight: 700;
-
-    color: var(--green);
-}
-
-
-.status - dot {
-    width: 8px;
-    height: 8px;
-
-    display: inline - block;
-
-    border - radius: 50 %;
-
-    background: var(--green);
-
-    box - shadow:
-    0 0 12px rgba(53, 223, 139, 0.8);
-
-    animation: pulse 1.7s infinite;
-}
-
-
-@keyframes pulse {
-
-    0 %, 100 % {
-        opacity: 1;
-        transform: scale(1);
+    ap: {
+        name: "Access Point",
+        type: "WIRELESS ACCESS POINT",
+        icon: "AP",
+        ip: "192.168.1.254",
+        mac: "AA:BB:CC:DD:EE:30",
+        connection: "Wi-Fi",
+        description:
+            "Access Point menyediakan koneksi jaringan wireless untuk perangkat yang menggunakan Wi-Fi."
     }
 
-    50 % {
-        opacity: 0.45;
-        transform: scale(0.7);
-    }
-}
+};
 
 
-/* ================= APP ================= */
+/* ================= VARIABLES ================= */
 
-.app {
-    min - height: calc(100vh - 76px);
+const canvas =
+    document.getElementById("networkCanvas");
 
-    display: flex;
-}
+const svg =
+    document.getElementById("connections");
 
+const packet =
+    document.getElementById("dataPacket");
 
-/* ================= SIDEBAR ================= */
+const overlay =
+    document.getElementById("detailOverlay");
 
-.sidebar {
-    width: 260px;
+const logContent =
+    document.getElementById("logContent");
 
-    flex - shrink: 0;
+const topologySelect =
+    document.getElementById("topologySelect");
 
-    padding: 24px 18px;
+let selectedDevice = null;
 
-    border - right: 1px solid var(--border);
+let currentTopology = "star";
 
-    background:
-    rgba(7, 17, 31, 0.72);
-}
+let deviceStatus = {
 
+    router: true,
+    switch: true,
+    pc1: true,
+    pc2: true,
+    server: true,
+    ap: true
 
-.side - title {
-    margin - bottom: 25px;
-}
+};
 
 
-.side - title span {
-    display: block;
+/* ================= CONNECTION DATA ================= */
 
-    font - size: 12px;
-    font - weight: 800;
+const topologyConnections = {
 
-    letter - spacing: 1.5px;
-}
+    star: [
+        ["router", "switch"],
+        ["switch", "pc1"],
+        ["switch", "pc2"],
+        ["switch", "server"],
+        ["switch", "ap"]
+    ],
 
+    tree: [
+        ["router", "switch"],
+        ["switch", "pc1"],
+        ["switch", "pc2"],
+        ["pc2", "server"],
+        ["pc2", "ap"]
+    ],
 
-.side - title small {
-    display: block;
+    bus: [
+        ["router", "switch"],
+        ["switch", "pc1"],
+        ["pc1", "pc2"],
+        ["pc2", "server"],
+        ["server", "ap"]
+    ],
 
-    margin - top: 5px;
+    ring: [
+        ["router", "switch"],
+        ["switch", "server"],
+        ["server", "ap"],
+        ["ap", "pc2"],
+        ["pc2", "pc1"],
+        ["pc1", "router"]
+    ]
 
-    color: var(--muted);
+};
 
-    font - size: 9px;
-    letter - spacing: 1px;
-}
 
+/* =========================================================
+   DRAW CONNECTIONS
+   ========================================================= */
 
-.panel - section {
-    margin - bottom: 26px;
-}
+function drawConnections() {
 
+    svg.innerHTML = "";
 
-.panel - section > label {
-    display: block;
+    const connections =
+        topologyConnections[currentTopology];
 
-    margin - bottom: 10px;
+    connections.forEach((connection, index) => {
 
-    color: #66809e;
+        const [from, to] = connection;
 
-    font - size: 9px;
-    font - weight: 800;
+        const start =
+            document.getElementById(from);
 
-    letter - spacing: 1.5px;
-}
+        const end =
+            document.getElementById(to);
 
-
-select {
-    width: 100 %;
-
-    padding: 12px;
-
-    color: var(--text);
-
-    border: 1px solid var(--border);
-    border - radius: 9px;
-
-    outline: none;
-
-    background: var(--panel);
-
-    cursor: pointer;
-}
-
-
-select:focus {
-    border - color: var(--blue);
-}
-
-
-/* ================= DEVICE LIST ================= */
-
-.device - list {
-    display: flex;
-    flex - direction: column;
-
-    gap: 7px;
-}
-
-
-.device - button {
-    width: 100 %;
-
-    display: flex;
-    align - items: center;
-
-    gap: 10px;
-
-    padding: 9px;
-
-    color: var(--text);
-
-    text - align: left;
-
-    border: 1px solid transparent;
-
-    border - radius: 9px;
-
-    background: transparent;
-
-    cursor: pointer;
-
-    transition:
-    0.2s ease;
-}
-
-
-.device - button:hover {
-    background: rgba(255, 255, 255, 0.04);
-
-    border - color: var(--border);
-
-    transform: translateX(3px);
-}
-
-
-.device - symbol {
-    width: 33px;
-    height: 33px;
-
-    flex - shrink: 0;
-
-    display: flex;
-    align - items: center;
-    justify - content: center;
-
-    border - radius: 9px;
-
-    font - size: 9px;
-    font - weight: 800;
-
-    background: var(--panel2);
-
-    border: 1px solid var(--border);
-}
-
-
-.router - symbol {
-    color: #55c7ff;
-}
-
-.switch-symbol {
-    color: #c28cff;
-}
-
-.pc - symbol {
-    color: #53dfaa;
-}
-
-.server - symbol {
-    color: #ffc95c;
-}
-
-.ap - symbol {
-    color: #ff7890;
-}
-
-
-.device - button strong {
-    display: block;
-
-    font - size: 11px;
-}
-
-
-.device - button small {
-    display: block;
-
-    margin - top: 3px;
-
-    color: var(--muted);
-
-    font - size: 9px;
-}
-
-
-/* ================= ACTION ================= */
-
-.action - button {
-    width: 100 %;
-
-    display: flex;
-    align - items: center;
-    justify - content: center;
-
-    gap: 8px;
-
-    margin - bottom: 8px;
-
-    padding: 11px;
-
-    color: #b8c8db;
-
-    border: 1px solid var(--border);
-
-    border - radius: 9px;
-
-    background: var(--panel);
-
-    cursor: pointer;
-
-    font - size: 10px;
-    font - weight: 800;
-
-    letter - spacing: 0.7px;
-
-    transition: 0.2s;
-}
-
-
-.action - button:hover {
-    border - color: rgba(255, 255, 255, 0.2);
-
-    background: var(--panel2);
-}
-
-
-.action - button.primary {
-    color: white;
-
-    border: none;
-
-    background:
-    linear - gradient(
-        135deg,
-            #1478ff,
-            #18c9ee
-    );
-
-    box - shadow:
-    0 8px 25px rgba(20, 130, 255, 0.18);
-}
-
-
-.action - button.primary:hover {
-    transform: translateY(-1px);
-}
-
-
-/* ================= NETWORK INFO ================= */
-
-.network - info {
-    display: grid;
-
-    grid - template - columns:
-    repeat(3, 1fr);
-
-    gap: 5px;
-
-    margin - top: 30px;
-
-    padding - top: 20px;
-
-    border - top: 1px solid var(--border);
-}
-
-
-.network - info div {
-    text - align: center;
-}
-
-
-.network - info span {
-    display: block;
-
-    margin - bottom: 5px;
-
-    color: #5f7690;
-
-    font - size: 7px;
-}
-
-
-.network - info strong {
-    font - size: 12px;
-}
-
-
-.online - text {
-    color: var(--green);
-    font - size: 8px!important;
-}
-
-
-/* ================= WORKSPACE ================= */
-
-.workspace {
-    flex: 1;
-
-    min - width: 0;
-
-    padding: 30px;
-}
-
-
-.workspace - header {
-    display: flex;
-    align - items: flex - start;
-    justify - content: space - between;
-
-    margin - bottom: 22px;
-}
-
-
-.eyebrow {
-    color: var(--blue);
-
-    font - size: 9px;
-    font - weight: 800;
-
-    letter - spacing: 2px;
-}
-
-
-.workspace - header h2 {
-    margin - top: 5px;
-
-    font - size: 26px;
-
-    letter - spacing: -0.5px;
-}
-
-
-.workspace - header p {
-    max - width: 610px;
-
-    margin - top: 7px;
-
-    color: var(--muted);
-
-    font - size: 11px;
-
-    line - height: 1.6;
-}
-
-
-.connection - status {
-    display: flex;
-    align - items: center;
-
-    gap: 10px;
-
-    padding: 9px 13px;
-
-    border: 1px solid var(--border);
-
-    border - radius: 10px;
-
-    background: rgba(255, 255, 255, 0.025);
-}
-
-
-.connection - status small {
-    display: block;
-
-    color: #617891;
-
-    font - size: 7px;
-}
-
-
-.connection - status strong {
-    display: block;
-
-    margin - top: 3px;
-
-    color: var(--green);
-
-    font - size: 9px;
-}
-
-
-/* ================= CANVAS ================= */
-
-.network - canvas {
-    position: relative;
-
-    width: 100 %;
-
-    min - height: 590px;
-
-    overflow: hidden;
-
-    border: 1px solid var(--border);
-
-    border - radius: 17px;
-
-    background - color: #081522;
-
-    background - image:
-    linear - gradient(
-        rgba(255, 255, 255, 0.025) 1px,
-        transparent 1px
-    ),
-        linear - gradient(
-            90deg,
-            rgba(255, 255, 255, 0.025) 1px,
-            transparent 1px
+        if (!start || !end) return;
+
+        const startPoint =
+            getDeviceCenter(start);
+
+        const endPoint =
+            getDeviceCenter(end);
+
+        const line =
+            document.createElementNS(
+                "http://www.w3.org/2000/svg",
+                "line"
+            );
+
+        line.setAttribute(
+            "x1",
+            startPoint.x
         );
 
-    background - size: 32px 32px;
+        line.setAttribute(
+            "y1",
+            startPoint.y
+        );
 
-    box - shadow:
-        inset 0 0 80px rgba(0, 0, 0, 0.35),
-        var(--shadow);
+        line.setAttribute(
+            "x2",
+            endPoint.x
+        );
+
+        line.setAttribute(
+            "y2",
+            endPoint.y
+        );
+
+        line.classList.add(
+            "connection-line"
+        );
+
+        line.dataset.index = index;
+
+        line.dataset.from = from;
+
+        line.dataset.to = to;
+
+        svg.appendChild(line);
+
+    });
+
+    updateNetworkInfo();
+
 }
 
 
-.network - canvas::after {
-    content: "";
+/* =========================================================
+   GET DEVICE CENTER
+   ========================================================= */
 
-    position: absolute;
+function getDeviceCenter(element) {
 
-    inset: 0;
+    const canvasRect =
+        canvas.getBoundingClientRect();
 
-    pointer - events: none;
+    const rect =
+        element.getBoundingClientRect();
 
-    background:
-    radial - gradient(
-        circle at center,
-        transparent 25 %,
-        rgba(0, 0, 0, 0.25)
-    );
+    return {
+
+        x:
+            rect.left +
+            rect.width / 2 -
+            canvasRect.left,
+
+        y:
+            rect.top +
+            rect.height / 2 -
+            canvasRect.top
+
+    };
+
 }
 
 
-/* ================= SVG ================= */
+/* =========================================================
+   RESIZE SVG VIEWBOX
+   ========================================================= */
 
-.connection - layer {
-    position: absolute;
+function resizeSVG() {
 
-    inset: 0;
+    const width =
+        canvas.clientWidth;
 
-    width: 100 %;
-    height: 100 %;
+    const height =
+        canvas.clientHeight;
 
-    z - index: 1;
-
-    overflow: visible;
-
-    pointer - events: none;
-}
-
-
-.connection - line {
-    fill: none;
-
-    stroke: #31516e;
-
-    stroke - width: 2;
-
-    stroke - dasharray: 7 7;
-
-    opacity: 0.85;
-}
-
-
-.connection - line.active {
-    stroke: #36b8ff;
-
-    stroke - width: 3;
-
-    filter:
-    drop - shadow(
-        0 0 5px
-            rgba(54, 184, 255, 0.7)
-    );
-}
-
-
-/* ================= DEVICES ================= */
-
-.network - device {
-    position: absolute;
-
-    z - index: 5;
-
-    transform:
-    translate(-50 %, -50 %);
-
-    width: 100px;
-
-    text - align: center;
-
-    cursor: pointer;
-
-    transition:
-        transform 0.2s ease;
-}
-
-
-.network - device:hover {
-    transform:
-    translate(-50 %, -50 %)
-    scale(1.06);
-}
-
-
-.device - circle {
-    width: 62px;
-    height: 62px;
-
-    margin: auto;
-
-    display: flex;
-    align - items: center;
-    justify - content: center;
-
-    border - radius: 18px;
-
-    background:
-    linear - gradient(
-        145deg,
-            #132a43,
-            #091727
+    svg.setAttribute(
+        "viewBox",
+        `0 0 ${width} ${height}`
     );
 
-    border: 1px solid rgba(90, 180, 255, 0.3);
+    drawConnections();
 
-    box - shadow:
-    0 12px 28px rgba(0, 0, 0, 0.35);
-
-    transition: 0.2s;
 }
 
 
-.network - device: hover.device - circle {
-    border - color: var(--cyan);
+/* =========================================================
+   DEVICE CLICK
+   ========================================================= */
 
-    box - shadow:
-    0 0 25px rgba(54, 224, 255, 0.25);
+document
+    .querySelectorAll(".network-device")
+    .forEach(device => {
+
+        device.addEventListener(
+            "click",
+            () => {
+
+                const id =
+                    device.dataset.device;
+
+                openDeviceDetail(id);
+
+            }
+        );
+
+    });
+
+
+/* =========================================================
+   SIDEBAR DEVICE CLICK
+   ========================================================= */
+
+document
+    .querySelectorAll(".device-button")
+    .forEach(button => {
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                const id =
+                    button.dataset.device;
+
+                const device =
+                    document.getElementById(id);
+
+                if (!device) return;
+
+                openDeviceDetail(id);
+
+            }
+        );
+
+    });
+
+
+/* =========================================================
+   OPEN DETAIL
+   ========================================================= */
+
+function openDeviceDetail(id) {
+
+    const data =
+        devices[id];
+
+    if (!data) return;
+
+    selectedDevice = id;
+
+    document.getElementById(
+        "detailIcon"
+    ).textContent = data.icon;
+
+    document.getElementById(
+        "detailType"
+    ).textContent = data.type;
+
+    document.getElementById(
+        "detailName"
+    ).textContent = data.name;
+
+    document.getElementById(
+        "detailIP"
+    ).textContent = data.ip;
+
+    document.getElementById(
+        "detailMAC"
+    ).textContent = data.mac;
+
+    document.getElementById(
+        "detailDeviceType"
+    ).textContent = data.name;
+
+    document.getElementById(
+        "detailConnection"
+    ).textContent = data.connection;
+
+    document.getElementById(
+        "detailDescription"
+    ).textContent = data.description;
+
+    updateDetailStatus();
+
+    overlay.classList.add("show");
+
 }
 
 
-.device - circle span {
-    font - size: 15px;
-    font - weight: 900;
+/* =========================================================
+   CLOSE DETAIL
+   ========================================================= */
 
-    letter - spacing: -0.5px;
-}
+document
+    .getElementById("closeDetail")
+    .addEventListener(
+        "click",
+        closeDetail
+    );
 
 
-.router.device - circle {
-    border - color: rgba(54, 194, 255, 0.5);
-}
+overlay.addEventListener(
+    "click",
+    event => {
 
-.router.device - circle span {
-    color: #54cfff;
-}
+        if (event.target === overlay) {
 
+            closeDetail();
 
-.switch .device - circle {
-    border - color: rgba(190, 120, 255, 0.5);
-}
+        }
 
-.switch .device - circle span {
-    color: #c987ff;
-}
-
-
-.pc.device - circle {
-    border - color: rgba(53, 223, 139, 0.4);
-}
-
-.pc.device - circle span {
-    color: #54e4a0;
-}
-
-
-.server.device - circle {
-    border - color: rgba(255, 200, 87, 0.45);
-}
-
-.server.device - circle span {
-    color: #ffd06d;
-}
-
-
-.ap.device - circle {
-    border - color: rgba(255, 100, 135, 0.45);
-}
-
-.ap.device - circle span {
-    color: #ff7995;
-}
-
-
-.device - name {
-    margin - top: 8px;
-
-    font - size: 9px;
-    font - weight: 800;
-
-    letter - spacing: 0.8px;
-}
-
-
-.device - state {
-    display: flex;
-    align - items: center;
-    justify - content: center;
-
-    gap: 4px;
-
-    margin - top: 5px;
-
-    color: #71869e;
-
-    font - size: 7px;
-}
-
-
-.device - state span {
-    width: 5px;
-    height: 5px;
-
-    border - radius: 50 %;
-
-    background: var(--green);
-
-    box - shadow:
-    0 0 7px rgba(53, 223, 139, 0.8);
-}
-
-
-.network - device.offline.device - circle {
-    opacity: 0.35;
-
-    filter: grayscale(0.8);
-}
-
-
-.network - device.offline.device - state {
-    color: var(--red);
-}
-
-
-.network - device.offline.device - state span {
-    background: var(--red);
-
-    box - shadow: none;
-}
-
-
-/* ================= LINK LABEL ================= */
-
-.link - label {
-    position: absolute;
-
-    z - index: 3;
-
-    padding: 5px 9px;
-
-    color: #6d8aa7;
-
-    border: 1px solid var(--border);
-
-    border - radius: 6px;
-
-    background: #081522;
-
-    font - size: 7px;
-    font - weight: 800;
-
-    letter - spacing: 1px;
-}
-
-
-.label - router {
-    left: 50 %;
-
-    top: 21 %;
-
-    transform: translateX(-50 %);
-}
-
-
-.label -switch {
-    left: 50 %;
-
-    top: 52 %;
-
-    transform: translateX(-50 %);
-}
-
-
-    /* ================= DATA PACKET ================= */
-
-    .data - packet {
-    position: absolute;
-
-z - index: 10;
-
-width: 28px;
-height: 28px;
-
-display: none;
-
-align - items: center;
-justify - content: center;
-
-border - radius: 50 %;
-
-color: white;
-
-font - size: 5px;
-font - weight: 900;
-
-background:
-linear - gradient(
-    135deg,
-            #24c9ff,
-            #2378ff
+    }
 );
 
-box - shadow:
-0 0 20px rgba(40, 190, 255, 0.9);
 
-transform:
-translate(-50 %, -50 %);
+function closeDetail() {
+
+    overlay.classList.remove("show");
+
+    selectedDevice = null;
+
 }
 
 
-/* ================= BOTTOM ================= */
+/* =========================================================
+   UPDATE DETAIL STATUS
+   ========================================================= */
 
-.bottom - area {
-    display: grid;
+function updateDetailStatus() {
 
-    grid - template - columns:
-    1fr 1.6fr;
+    if (!selectedDevice) return;
 
-    gap: 15px;
+    const status =
+        document.getElementById(
+            "detailStatus"
+        );
 
-    margin - top: 15px;
+    const toggle =
+        document.getElementById(
+            "toggleDevice"
+        );
+
+    const online =
+        deviceStatus[selectedDevice];
+
+    if (online) {
+
+        status.innerHTML =
+            `<span></span> ONLINE`;
+
+        status.style.color =
+            "var(--green)";
+
+        toggle.textContent =
+            "TURN OFF";
+
+    } else {
+
+        status.innerHTML =
+            `<span></span> OFFLINE`;
+
+        status.style.color =
+            "var(--red)";
+
+        toggle.textContent =
+            "TURN ON";
+
+    }
+
 }
 
 
-.legend,
-.event - log {
-    padding: 15px;
+/* =========================================================
+   TOGGLE DEVICE
+   ========================================================= */
 
-    border: 1px solid var(--border);
+document
+    .getElementById("toggleDevice")
+    .addEventListener(
+        "click",
+        () => {
 
-    border - radius: 12px;
+            if (!selectedDevice) return;
 
-    background:
-    rgba(255, 255, 255, 0.02);
-}
+            deviceStatus[selectedDevice] =
+                !deviceStatus[selectedDevice];
 
+            updateDeviceVisual(
+                selectedDevice
+            );
 
-.legend - title {
-    display: block;
+            updateDetailStatus();
 
-    margin - bottom: 10px;
+            const state =
+                deviceStatus[selectedDevice]
+                    ? "ONLINE"
+                    : "OFFLINE";
 
-    color: #69819a;
+            addLog(
+                `${devices[selectedDevice].name} berubah menjadi ${state}.`
+            );
 
-    font - size: 8px;
-    font - weight: 800;
-
-    letter - spacing: 1px;
-}
-
-
-.legend - item {
-    display: inline - flex;
-
-    align - items: center;
-
-    gap: 6px;
-
-    margin - right: 15px;
-
-    color: #8193aa;
-
-    font - size: 8px;
-}
-
-
-.legend - line {
-    width: 25px;
-    height: 2px;
-
-    background: #42617e;
-}
-
-
-.legend - dot {
-    width: 7px;
-    height: 7px;
-
-    border - radius: 50 %;
-
-    background: var(--green);
-}
-
-
-.legend - packet {
-    width: 8px;
-    height: 8px;
-
-    border - radius: 50 %;
-
-    background: var(--cyan);
-
-    box - shadow:
-    0 0 8px var(--cyan);
-}
-
-
-.log - header {
-    display: flex;
-
-    align - items: center;
-    justify - content: space - between;
-
-    margin - bottom: 8px;
-}
-
-
-.log - header strong {
-    font - size: 8px;
-
-    letter - spacing: 1px;
-}
-
-
-.log - header button {
-    padding: 4px 7px;
-
-    color: #69819a;
-
-    border: 1px solid var(--border);
-
-    border - radius: 5px;
-
-    background: transparent;
-
-    cursor: pointer;
-
-    font - size: 7px;
-}
-
-
-.log - content {
-    max - height: 45px;
-
-    overflow - y: auto;
-}
-
-
-.log - item {
-    display: flex;
-
-    gap: 10px;
-
-    color: #71869d;
-
-    font - size: 8px;
-
-    line - height: 1.6;
-}
-
-
-.log - time {
-    color: var(--cyan);
-}
-
-
-/* ================= EMPTY ================= */
-
-.empty - message {
-    position: absolute;
-
-    display: none;
-
-    top: 50 %;
-    left: 50 %;
-
-    transform: translate(-50 %, -50 %);
-
-    color: #6f8298;
-
-    font - size: 12px;
-}
-
-
-/* ================= DETAIL OVERLAY ================= */
-
-.detail - overlay {
-    position: fixed;
-
-    z - index: 100;
-
-    inset: 0;
-
-    display: none;
-
-    align - items: center;
-    justify - content: flex - end;
-
-    padding: 20px;
-
-    background:
-    rgba(0, 0, 0, 0.45);
-
-    backdrop - filter: blur(4px);
-}
-
-
-.detail - overlay.show {
-    display: flex;
-}
-
-
-.detail - panel {
-    position: relative;
-
-    width: min(420px, 100 %);
-
-    max - height: 90vh;
-
-    overflow - y: auto;
-
-    padding: 28px;
-
-    border: 1px solid rgba(80, 180, 255, 0.18);
-
-    border - radius: 20px;
-
-    background:
-    linear - gradient(
-        145deg,
-            #0d2035,
-            #081522
+        }
     );
 
-    box - shadow:
-    0 30px 80px rgba(0, 0, 0, 0.55);
 
-    animation:
-        panelIn 0.25s ease;
-}
+/* =========================================================
+   DEVICE VISUAL STATUS
+   ========================================================= */
 
+function updateDeviceVisual(id) {
 
-@keyframes panelIn {
+    const element =
+        document.getElementById(id);
 
-    from {
-        opacity: 0;
-        transform:
-        translateX(30px)
-        scale(0.98);
+    if (!element) return;
+
+    if (deviceStatus[id]) {
+
+        element.classList.remove(
+            "offline"
+        );
+
+        const state =
+            element.querySelector(
+                ".device-state"
+            );
+
+        state.innerHTML =
+            `<span></span> ONLINE`;
+
+    } else {
+
+        element.classList.add(
+            "offline"
+        );
+
+        const state =
+            element.querySelector(
+                ".device-state"
+            );
+
+        state.innerHTML =
+            `<span></span> OFFLINE`;
+
     }
 
-    to {
-        opacity: 1;
-        transform:
-        translateX(0)
-        scale(1);
-    }
 }
 
 
-.close - detail {
-    position: absolute;
-
-    top: 15px;
-    right: 15px;
-
-    width: 30px;
-    height: 30px;
-
-    color: #9aacc0;
-
-    border: 1px solid var(--border);
-
-    border - radius: 8px;
-
-    background: rgba(255, 255, 255, 0.03);
-
-    cursor: pointer;
-
-    font - size: 20px;
-}
-
-
-.close - detail:hover {
-    color: white;
-
-    background: rgba(255, 255, 255, 0.08);
-}
-
-
-.detail - icon {
-    width: 65px;
-    height: 65px;
-
-    display: flex;
-    align - items: center;
-    justify - content: center;
-
-    margin - bottom: 18px;
-
-    border - radius: 18px;
-
-    color: var(--cyan);
-
-    border: 1px solid rgba(54, 224, 255, 0.3);
-
-    background: rgba(54, 224, 255, 0.05);
-
-    font - size: 17px;
-    font - weight: 900;
-}
-
-
-.detail - heading > span {
-    color: #68819a;
-
-    font - size: 8px;
-    font - weight: 800;
-
-    letter - spacing: 1.5px;
-}
-
-
-.detail - heading h2 {
-    margin - top: 4px;
-
-    font - size: 26px;
-}
-
-
-.detail - status {
-    display: inline - flex;
-
-    align - items: center;
-
-    gap: 6px;
-
-    margin - top: 8px;
-
-    color: var(--green);
-
-    font - size: 9px;
-    font - weight: 800;
-}
-
-
-.detail - status span {
-    width: 7px;
-    height: 7px;
-
-    border - radius: 50 %;
-
-    background: var(--green);
-
-    box - shadow:
-    0 0 9px var(--green);
-}
-
-
-.detail - grid {
-    display: grid;
-
-    grid - template - columns:
-    repeat(2, 1fr);
-
-    gap: 8px;
-
-    margin - top: 25px;
-}
-
-
-.detail - card {
-    padding: 12px;
-
-    border: 1px solid var(--border);
-
-    border - radius: 10px;
-
-    background: rgba(255, 255, 255, 0.025);
-}
-
-
-.detail - card small {
-    display: block;
-
-    color: #5d7590;
-
-    font - size: 7px;
-}
-
-
-.detail - card strong {
-    display: block;
-
-    margin - top: 6px;
-
-    font - size: 10px;
-
-    word -break: break-word;
-}
-
-
-.detail - description {
-    margin - top: 20px;
-
-    padding - top: 18px;
-
-    border - top: 1px solid var(--border);
-}
-
-
-.detail - description span {
-    color: #69819a;
-
-    font - size: 8px;
-    font - weight: 800;
-
-    letter - spacing: 1px;
-}
-
-
-.detail - description p {
-    margin - top: 8px;
-
-    color: #91a3b7;
-
-    font - size: 10px;
-
-    line - height: 1.7;
-}
-
-
-.detail - actions {
-    display: flex;
-
-    gap: 8px;
-
-    margin - top: 22px;
-}
-
-
-.detail - button {
-    flex: 1;
-
-    padding: 11px;
-
-    color: #a8b9ca;
-
-    border: 1px solid var(--border);
-
-    border - radius: 8px;
-
-    background: rgba(255, 255, 255, 0.03);
-
-    cursor: pointer;
-
-    font - size: 9px;
-    font - weight: 800;
-}
-
-
-.detail - button:hover {
-    background: rgba(255, 255, 255, 0.08);
-}
-
-
-.primary - detail {
-    color: white;
-
-    border: none;
-
-    background:
-    linear - gradient(
-        135deg,
-            #1478ff,
-            #18c9ee
+/* =========================================================
+   SEND DATA
+   ========================================================= */
+
+document
+    .getElementById("sendPacket")
+    .addEventListener(
+        "click",
+        () => {
+
+            sendDataPacket();
+
+        }
     );
+
+
+document
+    .getElementById("sendFromDevice")
+    .addEventListener(
+        "click",
+        () => {
+
+            closeDetail();
+
+            sendDataPacket();
+
+        }
+    );
+
+
+/* =========================================================
+   SEND PACKET ANIMATION
+   ========================================================= */
+
+function sendDataPacket() {
+
+    const connections =
+        topologyConnections[currentTopology];
+
+    if (!connections.length) return;
+
+    const activeConnection =
+        connections.find(
+            connection => {
+
+                return (
+                    deviceStatus[connection[0]] &&
+                    deviceStatus[connection[1]]
+                );
+
+            }
+        );
+
+    if (!activeConnection) {
+
+        addLog(
+            "Tidak ada jalur aktif untuk mengirim data."
+        );
+
+        return;
+
+    }
+
+    const [from, to] =
+        activeConnection;
+
+    animatePacket(
+        from,
+        to
+    );
+
+    addLog(
+        `Data dikirim dari ${devices[from].name} menuju ${devices[to].name}.`
+    );
+
 }
 
 
-/* ================= RESPONSIVE ================= */
+/* =========================================================
+   ANIMATE PACKET
+   ========================================================= */
 
-@media(max - width: 1000px) {
+function animatePacket(fromId, toId) {
 
-    .sidebar {
-        width: 220px;
+    const from =
+        document.getElementById(fromId);
+
+    const to =
+        document.getElementById(toId);
+
+    if (!from || !to) return;
+
+    const start =
+        getDeviceCenter(from);
+
+    const end =
+        getDeviceCenter(to);
+
+    const duration = 1100;
+
+    const startTime =
+        performance.now();
+
+    packet.style.display =
+        "flex";
+
+    function animation(currentTime) {
+
+        const elapsed =
+            currentTime - startTime;
+
+        const progress =
+            Math.min(
+                elapsed / duration,
+                1
+            );
+
+        const eased =
+            progress < 0.5
+                ? 2 * progress * progress
+                : 1 -
+                  Math.pow(
+                      -2 * progress + 2,
+                      2
+                  ) / 2;
+
+        const x =
+            start.x +
+            (end.x - start.x) *
+            eased;
+
+        const y =
+            start.y +
+            (end.y - start.y) *
+            eased;
+
+        packet.style.left =
+            `${x}px`;
+
+        packet.style.top =
+            `${y}px`;
+
+        if (progress < 1) {
+
+            requestAnimationFrame(
+                animation
+            );
+
+        } else {
+
+            packet.style.display =
+                "none";
+
+            highlightConnection(
+                fromId,
+                toId
+            );
+
+        }
+
     }
 
-    .workspace {
-        padding: 20px;
-    }
+    requestAnimationFrame(
+        animation
+    );
 
-    .network - canvas {
-        min - height: 530px;
-    }
 }
 
 
-@media(max - width: 760px) {
+/* =========================================================
+   HIGHLIGHT CONNECTION
+   ========================================================= */
 
-    .app {
-        flex - direction: column;
-    }
+function highlightConnection(
+    from,
+    to
+) {
 
-    .sidebar {
-        width: 100 %;
+    const lines =
+        document.querySelectorAll(
+            ".connection-line"
+        );
 
-        border - right: none;
-        border - bottom: 1px solid var(--border);
-    }
+    lines.forEach(line => {
 
-    .device - list {
-        display: grid;
+        if (
+            (
+                line.dataset.from === from &&
+                line.dataset.to === to
+            ) ||
+            (
+                line.dataset.from === to &&
+                line.dataset.to === from
+            )
+        ) {
 
-        grid - template - columns:
-        repeat(3, 1fr);
-    }
+            line.classList.add(
+                "active"
+            );
 
-    .network - info {
-        display: none;
-    }
+            setTimeout(
+                () => {
 
-    .workspace - header {
-        flex - direction: column;
+                    line.classList.remove(
+                        "active"
+                    );
 
-        gap: 15px;
-    }
+                },
+                700
+            );
 
-    .bottom - area {
-        grid - template - columns: 1fr;
-    }
+        }
 
-    .network - canvas {
-        min - height: 520px;
-    }
+    });
+
 }
 
 
-@media(max - width: 500px) {
+/* =========================================================
+   TOPOLOGY CHANGE
+   ========================================================= */
 
-    .topbar {
-        padding: 0 15px;
-    }
+topologySelect.addEventListener(
+    "change",
+    () => {
 
-    .brand h1 {
-        font - size: 12px;
-    }
+        currentTopology =
+            topologySelect.value;
 
-    .header - status {
-        display: none;
-    }
+        updateDevicePositions();
 
-    .workspace {
-        padding: 12px;
-    }
+        setTimeout(
+            () => {
 
-    .device - list {
-        grid - template - columns:
-        repeat(2, 1fr);
-    }
+                drawConnections();
 
-    .network - canvas {
-        min - height: 500px;
-    }
+            },
+            50
+        );
 
-    .detail - panel {
-        padding: 22px;
+        addLog(
+            `Topologi diubah menjadi ${getTopologyName(currentTopology)}.`
+        );
+
     }
+);
+
+
+/* =========================================================
+   TOPOLOGY NAMES
+   ========================================================= */
+
+function getTopologyName(type) {
+
+    const names = {
+
+        star: "Star Topology",
+
+        tree: "Tree Topology",
+
+        bus: "Bus Topology",
+
+        ring: "Ring Topology"
+
+    };
+
+    return names[type];
+
 }
+
+
+/* =========================================================
+   UPDATE DEVICE POSITIONS
+   ========================================================= */
+
+function updateDevicePositions() {
+
+    const positions = {
+
+        star: {
+
+            router: [50, 9],
+
+            switch: [50, 35],
+
+            pc1: [18, 68],
+
+            pc2: [39, 68],
+
+            server: [61, 68],
+
+            ap: [82, 68]
+
+        },
+
+        tree: {
+
+            router: [50, 9],
+
+            switch: [50, 34],
+
+            pc1: [28, 60],
+
+            pc2: [50, 60],
+
+            server: [50, 84],
+
+            ap: [72, 60]
+
+        },
+
+        bus: {
+
+            router: [10, 50],
+
+            switch: [28, 50],
+
+            pc1: [45, 50],
+
+            pc2: [62, 50],
+
+            server: [78, 50],
+
+            ap: [92, 50]
+
+        },
+
+        ring: {
+
+            router: [50, 12],
+
+            switch: [78, 30],
+
+            server: [78, 68],
+
+            ap: [50, 86],
+
+            pc2: [22, 68],
+
+            pc1: [22, 30]
+
+        }
+
+    };
+
+    const selected =
+        positions[currentTopology];
+
+    Object.keys(selected)
+        .forEach(id => {
+
+            const element =
+                document.getElementById(id);
+
+            const [x, y] =
+                selected[id];
+
+            element.style.left =
+                `${x}%`;
+
+            element.style.top =
+                `${y}%`;
+
+        });
+
+    updateLabels();
+
+}
+
+
+/* =========================================================
+   UPDATE LABELS
+   ========================================================= */
+
+function updateLabels() {
+
+    const routerLabel =
+        document.querySelector(
+            ".label-router"
+        );
+
+    const switchLabel =
+        document.querySelector(
+            ".label-switch"
+        );
+
+    if (currentTopology === "star") {
+
+        routerLabel.style.display =
+            "block";
+
+        switchLabel.style.display =
+            "block";
+
+        routerLabel.textContent =
+            "INTERNET";
+
+        switchLabel.textContent =
+            "LAN";
+
+    }
+
+    else if (currentTopology === "tree") {
+
+        routerLabel.style.display =
+            "block";
+
+        switchLabel.style.display =
+            "none";
+
+        routerLabel.textContent =
+            "ROOT";
+
+    }
+
+    else {
+
+        routerLabel.style.display =
+            "none";
+
+        switchLabel.style.display =
+            "none";
+
+    }
+
+}
+
+
+/* =========================================================
+   RESET NETWORK
+   ========================================================= */
+
+document
+    .getElementById("resetNetwork")
+    .addEventListener(
+        "click",
+        () => {
+
+            Object.keys(deviceStatus)
+                .forEach(id => {
+
+                    deviceStatus[id] =
+                        true;
+
+                    updateDeviceVisual(id);
+
+                });
+
+            currentTopology =
+                "star";
+
+            topologySelect.value =
+                "star";
+
+            updateDevicePositions();
+
+            drawConnections();
+
+            addLog(
+                "Network berhasil di-reset."
+            );
+
+        }
+    );
+
+
+/* =========================================================
+   CLEAR LOG
+   ========================================================= */
+
+document
+    .getElementById("clearLog")
+    .addEventListener(
+        "click",
+        () => {
+
+            logContent.innerHTML = "";
+
+        }
+    );
+
+
+/* =========================================================
+   NETWORK LOG
+   ========================================================= */
+
+function addLog(message) {
+
+    const item =
+        document.createElement("div");
+
+    item.className =
+        "log-item";
+
+    const time =
+        new Date()
+            .toLocaleTimeString(
+                "id-ID",
+                {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit"
+                }
+            );
+
+    item.innerHTML = `
+
+        <span class="log-time">
+            ${time}
+        </span>
+
+        <span>
+            ${message}
+        </span>
+
+    `;
+
+    logContent.prepend(item);
+
+}
+
+
+/* =========================================================
+   UPDATE NETWORK INFO
+   ========================================================= */
+
+function updateNetworkInfo() {
+
+    const connections =
+        topologyConnections[currentTopology];
+
+    document.getElementById(
+        "deviceCount"
+    ).textContent =
+        Object.keys(devices).length;
+
+    document.getElementById(
+        "linkCount"
+    ).textContent =
+        connections.length;
+
+}
+
+
+/* =========================================================
+   INITIALIZE
+   ========================================================= */
+
+window.addEventListener(
+    "load",
+    () => {
+
+        updateDevicePositions();
+
+        setTimeout(
+            () => {
+
+                resizeSVG();
+
+            },
+            100
+        );
+
+        Object.keys(deviceStatus)
+            .forEach(updateDeviceVisual);
+
+        addLog(
+            "Interactive topology siap digunakan."
+        );
+
+    }
+);
+
+
+/* =========================================================
+   WINDOW RESIZE
+   ========================================================= */
+
+window.addEventListener(
+    "resize",
+    () => {
+
+        resizeSVG();
+
+    }
+);
