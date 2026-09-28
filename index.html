@@ -1,513 +1,232 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Interactive Network Topology</title>
+    <title>Network Topology Simulator</title>
 
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-    <header class="topbar">
+<div class="app">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
 
         <div class="brand">
-            <div class="brand-icon">⌘</div>
+            <div class="brand-icon">🌐</div>
+            <div>
+                <h2>NET SIMULATOR</h2>
+                <span>Interactive Topology</span>
+            </div>
+        </div>
+
+        <div class="menu-title">TOPOLOGY</div>
+
+        <button class="topology-btn active" data-topology="star">
+            <span>⭐</span>
+            <div>
+                <strong>STAR</strong>
+                <small>Central switch</small>
+            </div>
+        </button>
+
+        <button class="topology-btn" data-topology="tree">
+            <span>🌳</span>
+            <div>
+                <strong>TREE</strong>
+                <small>Hierarchical network</small>
+            </div>
+        </button>
+
+        <button class="topology-btn" data-topology="bus">
+            <span>━</span>
+            <div>
+                <strong>BUS</strong>
+                <small>Shared backbone</small>
+            </div>
+        </button>
+
+        <button class="topology-btn" data-topology="ring">
+            <span>⭕</span>
+            <div>
+                <strong>RING</strong>
+                <small>Circular network</small>
+            </div>
+        </button>
+
+        <div class="menu-title">CONTROL</div>
+
+        <button id="sendBtn" class="control-btn send">
+            <span>➤</span>
+            SEND DATA
+        </button>
+
+        <button id="resetBtn" class="control-btn reset">
+            <span>↻</span>
+            RESET
+        </button>
+
+        <div class="info-box">
+            <div class="info-title">CURRENT MODE</div>
+            <div id="currentMode">STAR TOPOLOGY</div>
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN -->
+    <main class="main">
+
+        <header class="header">
 
             <div>
-                <h1>NETWORK TOPOLOGY</h1>
-                <p>Interactive Network Simulator</p>
-            </div>
-        </div>
-
-        <div class="system-status">
-            <span class="status-light"></span>
-            SYSTEM ONLINE
-        </div>
-
-    </header>
-
-
-    <main class="container">
-
-        <!-- CONTROL PANEL -->
-
-        <section class="control-panel">
-
-            <div class="panel-title">
-                <span>NETWORK CONTROL PANEL</span>
+                <div class="eyebrow">NETWORK SIMULATION</div>
+                <h1 id="title">STAR TOPOLOGY</h1>
+                <p id="description">
+                    Semua perangkat terhubung melalui satu switch pusat.
+                </p>
             </div>
 
-            <div class="controls">
-
-                <label>
-                    TOPOLOGY
-                </label>
-
-                <select id="topologySelect">
-
-                    <option value="star">
-                        Star Topology
-                    </option>
-
-                    <option value="tree">
-                        Tree Topology
-                    </option>
-
-                    <option value="bus">
-                        Bus Topology
-                    </option>
-
-                    <option value="ring">
-                        Ring Topology
-                    </option>
-
-                </select>
-
-
-                <button id="sendPacket" class="primary">
-                    ▶ SEND DATA
-                </button>
-
-                <button id="resetNetwork">
-                    ↻ RESET NETWORK
-                </button>
-
+            <div class="status">
+                <span class="status-dot"></span>
+                NETWORK ONLINE
             </div>
 
-        </section>
+        </header>
 
 
-        <!-- DEVICE BAR -->
-
-        <section class="device-bar">
-
-            <div class="device-menu-item" data-device="router">
-                <strong>R</strong>
-                <span>Router</span>
-            </div>
-
-            <div class="device-menu-item" data-device="switch">
-                <strong>S</strong>
-                <span>Switch</span>
-            </div>
-
-            <div class="device-menu-item" data-device="pc1">
-                <strong>PC</strong>
-                <span>PC 01 Client</span>
-            </div>
-
-            <div class="device-menu-item" data-device="pc2">
-                <strong>PC</strong>
-                <span>PC 02 Client</span>
-            </div>
-
-            <div class="device-menu-item" data-device="server">
-                <strong>SRV</strong>
-                <span>Data Server</span>
-            </div>
-
-            <div class="device-menu-item" data-device="ap">
-                <strong>AP</strong>
-                <span>Access Point</span>
-            </div>
-
-        </section>
-
-
-        <!-- STATS -->
-
+        <!-- STATISTICS -->
         <section class="stats">
 
-            <div>
-                <small>DEVICES</small>
-                <strong id="deviceCount">6</strong>
+            <div class="stat-card">
+                <span>PACKETS</span>
+                <strong id="packetCount">0</strong>
             </div>
 
-            <div>
-                <small>LINKS</small>
-                <strong id="linkCount">5</strong>
+            <div class="stat-card">
+                <span>HOPS</span>
+                <strong id="hopCount">0</strong>
             </div>
 
-            <div>
-                <small>STATUS</small>
-                <strong class="online-text">ONLINE</strong>
+            <div class="stat-card">
+                <span>LATENCY</span>
+                <strong id="latency">0 ms</strong>
             </div>
 
-            <div>
-                <small>NETWORK</small>
-                <strong>LABORATORY</strong>
+            <div class="stat-card">
+                <span>STATUS</span>
+                <strong id="packetStatus">IDLE</strong>
             </div>
 
         </section>
 
 
-        <!-- CONTENT -->
+        <!-- NETWORK -->
+        <section class="network-panel">
 
-        <section class="content">
-
-            <div class="section-heading">
-
+            <div class="panel-header">
                 <div>
-                    <h2 id="topologyTitle">
-                        Star Topology
-                    </h2>
-
-                    <p id="topologyDescription">
-                        Data dari router menuju switch sebagai pusat jaringan,
-                        kemudian diteruskan menuju perangkat tujuan.
-                    </p>
+                    <h2>NETWORK MAP</h2>
+                    <span>Real-time packet visualization</span>
                 </div>
 
-            </div>
-
-
-            <!-- NETWORK CANVAS -->
-
-            <div
-                id="networkCanvas"
-                class="network-canvas"
-            >
-
-                <svg
-                    id="connectionSvg"
-                    class="connection-svg"
-                ></svg>
-
-
-                <!-- labels -->
-
-                <div
-                    id="labelInternet"
-                    class="network-label"
-                >
-                    NETWORK GATEWAY
-                </div>
-
-                <div
-                    id="labelLan"
-                    class="network-label"
-                >
-                    LAN
-                </div>
-
-
-                <!-- PACKET -->
-
-                <div
-                    id="packet"
-                    class="packet"
-                >
-                    <span></span>
-                </div>
-
-
-                <!-- ROUTER -->
-
-                <div
-                    id="router"
-                    class="network-device router"
-                    data-device="router"
-                >
-
-                    <div class="device-circle">
-                        R
-                    </div>
-
-                    <div class="device-name">
-                        ROUTER
-                    </div>
-
-                    <small>
-                        ● ONLINE
-                    </small>
-
-                </div>
-
-
-                <!-- SWITCH -->
-
-                <div
-                    id="switch"
-                    class="network-device switch"
-                    data-device="switch"
-                >
-
-                    <div class="device-circle">
-                        S
-                    </div>
-
-                    <div class="device-name">
-                        SWITCH
-                    </div>
-
-                    <small>
-                        ● ONLINE
-                    </small>
-
-                </div>
-
-
-                <!-- PC 1 -->
-
-                <div
-                    id="pc1"
-                    class="network-device pc"
-                    data-device="pc1"
-                >
-
-                    <div class="device-circle">
-                        PC
-                    </div>
-
-                    <div class="device-name">
-                        PC 01
-                    </div>
-
-                    <small>
-                        ● ONLINE
-                    </small>
-
-                </div>
-
-
-                <!-- PC 2 -->
-
-                <div
-                    id="pc2"
-                    class="network-device pc"
-                    data-device="pc2"
-                >
-
-                    <div class="device-circle">
-                        PC
-                    </div>
-
-                    <div class="device-name">
-                        PC 02
-                    </div>
-
-                    <small>
-                        ● ONLINE
-                    </small>
-
-                </div>
-
-
-                <!-- SERVER -->
-
-                <div
-                    id="server"
-                    class="network-device server"
-                    data-device="server"
-                >
-
-                    <div class="device-circle">
-                        SRV
-                    </div>
-
-                    <div class="device-name">
-                        SERVER
-                    </div>
-
-                    <small>
-                        ● ONLINE
-                    </small>
-
-                </div>
-
-
-                <!-- ACCESS POINT -->
-
-                <div
-                    id="ap"
-                    class="network-device ap"
-                    data-device="ap"
-                >
-
-                    <div class="device-circle">
-                        AP
-                    </div>
-
-                    <div class="device-name">
-                        ACCESS POINT
-                    </div>
-
-                    <small>
-                        ● ONLINE
-                    </small>
-
-                </div>
-
-            </div>
-
-
-            <!-- BOTTOM -->
-
-            <div class="bottom-grid">
-
-                <!-- LOG -->
-
-                <div class="panel log-panel">
-
-                    <div class="panel-header">
-
-                        <div>
-                            <span class="eyebrow">
-                                SIMULATION
-                            </span>
-
-                            <h3>
-                                Network Activity
-                            </h3>
-                        </div>
-
-                        <button id="clearLog">
-                            CLEAR
-                        </button>
-
-                    </div>
-
-                    <div
-                        id="logContent"
-                        class="log-content"
-                    ></div>
-
-                </div>
-
-
-                <!-- INFO -->
-
-                <div class="panel info-panel">
-
-                    <span class="eyebrow">
-                        NETWORK STATUS
+                <div class="legend">
+                    <span>
+                        <i class="legend-device"></i>
+                        Device
                     </span>
 
-                    <div class="connected">
-                        <span></span>
-                        CONNECTED
-                    </div>
+                    <span>
+                        <i class="legend-packet"></i>
+                        Packet
+                    </span>
+                </div>
+            </div>
 
-                    <p>
-                        Klik perangkat untuk melihat informasi.
-                        Gunakan <b>SEND DATA</b> untuk melihat
-                        bagaimana paket bergerak sesuai karakter
-                        topologi jaringan.
-                    </p>
+            <div id="networkCanvas" class="network-canvas">
 
+                <svg id="connectionSvg"></svg>
+
+                <div id="packet" class="packet">
+                    <div class="packet-core"></div>
                 </div>
 
+                <!-- DEVICES -->
+
+                <div id="router" class="device router">
+                    <div class="device-icon">📡</div>
+                    <strong>ROUTER</strong>
+                    <small>Gateway</small>
+                </div>
+
+                <div id="switch" class="device switch">
+                    <div class="device-icon">🔀</div>
+                    <strong>SWITCH</strong>
+                    <small>Central</small>
+                </div>
+
+                <div id="pc1" class="device pc">
+                    <div class="device-icon">💻</div>
+                    <strong>PC 1</strong>
+                    <small>Client</small>
+                </div>
+
+                <div id="pc2" class="device pc">
+                    <div class="device-icon">💻</div>
+                    <strong>PC 2</strong>
+                    <small>Client</small>
+                </div>
+
+                <div id="server" class="device server">
+                    <div class="device-icon">🖥️</div>
+                    <strong>SERVER</strong>
+                    <small>Destination</small>
+                </div>
+
+                <div id="ap" class="device ap">
+                    <div class="device-icon">📶</div>
+                    <strong>ACCESS POINT</strong>
+                    <small>Wireless</small>
+                </div>
+
+                <!-- BUS LINE -->
+                <div id="busLine" class="bus-line"></div>
+
+            </div>
+
+        </section>
+
+
+        <!-- LOG -->
+        <section class="log-panel">
+
+            <div class="log-header">
+                <div>
+                    <h2>ACTIVITY LOG</h2>
+                    <span>Packet transmission activity</span>
+                </div>
+
+                <span id="logStatus">READY</span>
+            </div>
+
+            <div id="activityLog" class="activity-log">
+                <div class="log-item">
+                    <span class="log-time">--:--:--</span>
+                    <span>System ready. Select topology and send data.</span>
+                </div>
             </div>
 
         </section>
 
     </main>
 
+</div>
 
-    <!-- DETAIL -->
-
-    <div
-        id="detailOverlay"
-        class="detail-overlay"
-    >
-
-        <div class="detail-card">
-
-            <button
-                id="closeDetail"
-                class="close-button"
-            >
-                ×
-            </button>
-
-            <div
-                id="detailIcon"
-                class="detail-icon"
-            >
-                R
-            </div>
-
-            <span
-                id="detailType"
-                class="detail-type"
-            >
-                NETWORK DEVICE
-            </span>
-
-            <h2 id="detailName">
-                Router
-            </h2>
-
-            <div
-                id="detailStatus"
-                class="detail-status"
-            >
-                <span></span>
-                ONLINE
-            </div>
-
-            <div class="detail-grid">
-
-                <div>
-                    <small>IP ADDRESS</small>
-                    <strong id="detailIP">
-                        -
-                    </strong>
-                </div>
-
-                <div>
-                    <small>MAC ADDRESS</small>
-                    <strong id="detailMAC">
-                        -
-                    </strong>
-                </div>
-
-                <div>
-                    <small>DEVICE TYPE</small>
-                    <strong id="detailDeviceType">
-                        -
-                    </strong>
-                </div>
-
-                <div>
-                    <small>CONNECTION</small>
-                    <strong id="detailConnection">
-                        -
-                    </strong>
-                </div>
-
-            </div>
-
-            <div class="description">
-
-                <small>
-                    DESCRIPTION
-                </small>
-
-                <p id="detailDescription">
-                    -
-                </p>
-
-            </div>
-
-            <button
-                id="toggleDevice"
-                class="toggle-button"
-            >
-                TURN OFF
-            </button>
-
-        </div>
-
-    </div>
-
-
-    <script src="script.js"></script>
+<script src="script.js"></script>
 
 </body>
-
 </html>
