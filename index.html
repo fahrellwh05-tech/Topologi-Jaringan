@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -226,7 +225,10 @@
             <div id="networkCanvas" class="network-canvas">
 
                 <!-- SVG connection layer -->
-                <svg id="connections" class="connection-layer" viewBox="0 0 1000 650" preserveAspectRatio="none">
+                <svg id="connections"
+                     class="connection-layer"
+                     viewBox="0 0 1000 650"
+                     preserveAspectRatio="none">
 
                 </svg>
 
@@ -240,7 +242,12 @@
                 <!-- ================= DEVICES ================= -->
 
                 <!-- ROUTER -->
-                <div id="router" class="network-device router" style="left:50%; top:9%;" data-device="router">
+                <div
+                    id="router"
+                    class="network-device router"
+                    style="left:50%; top:9%;"
+                    data-device="router"
+                >
 
                     <div class="device-circle">
                         <span>R</span>
@@ -259,7 +266,12 @@
 
 
                 <!-- SWITCH -->
-                <div id="switch" class="network-device switch" style="left:50%; top:35%;" data-device="switch">
+                <div
+                    id="switch"
+                    class="network-device switch"
+                    style="left:50%; top:35%;"
+                    data-device="switch"
+                >
 
                     <div class="device-circle">
                         <span>S</span>
@@ -278,7 +290,12 @@
 
 
                 <!-- PC 1 -->
-                <div id="pc1" class="network-device pc" style="left:18%; top:68%;" data-device="pc1">
+                <div
+                    id="pc1"
+                    class="network-device pc"
+                    style="left:18%; top:68%;"
+                    data-device="pc1"
+                >
 
                     <div class="device-circle">
                         <span>PC</span>
@@ -297,7 +314,12 @@
 
 
                 <!-- PC 2 -->
-                <div id="pc2" class="network-device pc" style="left:39%; top:68%;" data-device="pc2">
+                <div
+                    id="pc2"
+                    class="network-device pc"
+                    style="left:39%; top:68%;"
+                    data-device="pc2"
+                >
 
                     <div class="device-circle">
                         <span>PC</span>
@@ -316,7 +338,12 @@
 
 
                 <!-- SERVER -->
-                <div id="server" class="network-device server" style="left:61%; top:68%;" data-device="server">
+                <div
+                    id="server"
+                    class="network-device server"
+                    style="left:61%; top:68%;"
+                    data-device="server"
+                >
 
                     <div class="device-circle">
                         <span>SRV</span>
@@ -335,7 +362,12 @@
 
 
                 <!-- ACCESS POINT -->
-                <div id="ap" class="network-device ap" style="left:82%; top:68%;" data-device="ap">
+                <div
+                    id="ap"
+                    class="network-device ap"
+                    style="left:82%; top:68%;"
+                    data-device="ap"
+                >
 
                     <div class="device-circle">
                         <span>AP</span>
@@ -515,7 +547,8 @@
                     TURN OFF
                 </button>
 
-                <button id="sendFromDevice" class="detail-button primary-detail">
+                <button id="sendFromDevice"
+                        class="detail-button primary-detail">
                     SEND DATA
                 </button>
 
@@ -529,5 +562,4 @@
     <script src="script.js"></script>
 
 </body>
-
 </html>
