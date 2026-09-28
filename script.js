@@ -1,9 +1,9 @@
-/* =========================================================
-   NETWORK TOPOLOGY INTERACTIVE SIMULATOR
-   ========================================================= */
+/* =====================================================
+   NETWORK TOPOLOGY SIMULATOR
+   ===================================================== */
 
 
-/* ================= DEVICE DATABASE ================= */
+/* ================= DEVICE DATA ================= */
 
 const devices = {
 
@@ -15,7 +15,7 @@ const devices = {
         mac: "AA:BB:CC:DD:EE:01",
         connection: "Ethernet",
         description:
-            "Router berfungsi sebagai gateway yang menghubungkan jaringan lokal dengan jaringan lain."
+            "Router berfungsi sebagai gateway yang menghubungkan jaringan lokal dengan jaringan lainnya."
     },
 
     switch: {
@@ -26,7 +26,7 @@ const devices = {
         mac: "AA:BB:CC:DD:EE:02",
         connection: "Ethernet",
         description:
-            "Switch menghubungkan beberapa perangkat dalam jaringan lokal dan meneruskan data ke perangkat tujuan."
+            "Switch menghubungkan beberapa perangkat dalam jaringan lokal dan meneruskan data menuju perangkat tujuan."
     },
 
     pc1: {
@@ -48,7 +48,7 @@ const devices = {
         mac: "AA:BB:CC:DD:EE:11",
         connection: "Ethernet",
         description:
-            "PC 02 merupakan perangkat client yang terhubung ke jaringan lokal melalui switch."
+            "PC 02 merupakan perangkat client yang terhubung ke jaringan lokal."
     },
 
     server: {
@@ -59,7 +59,7 @@ const devices = {
         mac: "AA:BB:CC:DD:EE:20",
         connection: "Ethernet",
         description:
-            "Server menyediakan layanan dan data yang dapat diakses oleh perangkat client dalam jaringan."
+            "Server menyediakan layanan dan data yang dapat diakses oleh perangkat client."
     },
 
     ap: {
@@ -76,45 +76,9 @@ const devices = {
 };
 
 
-/* ================= VARIABLES ================= */
+/* ================= TOPOLOGIES ================= */
 
-const canvas =
-    document.getElementById("networkCanvas");
-
-const svg =
-    document.getElementById("connections");
-
-const packet =
-    document.getElementById("dataPacket");
-
-const overlay =
-    document.getElementById("detailOverlay");
-
-const logContent =
-    document.getElementById("logContent");
-
-const topologySelect =
-    document.getElementById("topologySelect");
-
-let selectedDevice = null;
-
-let currentTopology = "star";
-
-let deviceStatus = {
-
-    router: true,
-    switch: true,
-    pc1: true,
-    pc2: true,
-    server: true,
-    ap: true
-
-};
-
-
-/* ================= CONNECTION DATA ================= */
-
-const topologyConnections = {
+const topologies = {
 
     star: [
         ["router", "switch"],
@@ -152,85 +116,127 @@ const topologyConnections = {
 };
 
 
-/* =========================================================
-   DRAW CONNECTIONS
-   ========================================================= */
+/* ================= POSITIONS ================= */
 
-function drawConnections() {
+const positions = {
 
-    svg.innerHTML = "";
+    star: {
 
-    const connections =
-        topologyConnections[currentTopology];
+        router: [50, 10],
+        switch: [50, 35],
 
-    connections.forEach((connection, index) => {
+        pc1: [18, 70],
+        pc2: [39, 70],
+        server: [61, 70],
+        ap: [82, 70]
 
-        const [from, to] = connection;
+    },
 
-        const start =
-            document.getElementById(from);
+    tree: {
 
-        const end =
-            document.getElementById(to);
+        router: [50, 10],
+        switch: [50, 34],
 
-        if (!start || !end) return;
+        pc1: [25, 65],
+        pc2: [50, 65],
+        server: [50, 87],
+        ap: [75, 65]
 
-        const startPoint =
-            getDeviceCenter(start);
+    },
 
-        const endPoint =
-            getDeviceCenter(end);
+    bus: {
 
-        const line =
-            document.createElementNS(
-                "http://www.w3.org/2000/svg",
-                "line"
-            );
+        router: [10, 50],
+        switch: [28, 50],
+        pc1: [45, 50],
+        pc2: [62, 50],
+        server: [78, 50],
+        ap: [92, 50]
 
-        line.setAttribute(
-            "x1",
-            startPoint.x
-        );
+    },
 
-        line.setAttribute(
-            "y1",
-            startPoint.y
-        );
+    ring: {
 
-        line.setAttribute(
-            "x2",
-            endPoint.x
-        );
+        router: [50, 12],
+        switch: [78, 30],
+        server: [78, 70],
+        ap: [50, 88],
+        pc2: [22, 70],
+        pc1: [22, 30]
 
-        line.setAttribute(
-            "y2",
-            endPoint.y
-        );
+    }
 
-        line.classList.add(
-            "connection-line"
-        );
+};
 
-        line.dataset.index = index;
 
-        line.dataset.from = from;
+/* ================= VARIABLES ================= */
 
-        line.dataset.to = to;
+let currentTopology = "star";
 
-        svg.appendChild(line);
+let selectedDevice = null;
+
+const status = {
+
+    router: true,
+    switch: true,
+    pc1: true,
+    pc2: true,
+    server: true,
+    ap: true
+
+};
+
+
+const canvas =
+    document.getElementById(
+        "networkCanvas"
+    );
+
+const svg =
+    document.getElementById(
+        "connectionSvg"
+    );
+
+const packet =
+    document.getElementById(
+        "packet"
+    );
+
+
+/* =====================================================
+   POSITION DEVICES
+   ===================================================== */
+
+function positionDevices() {
+
+    const current =
+        positions[currentTopology];
+
+    Object.keys(current).forEach(id => {
+
+        const element =
+            document.getElementById(id);
+
+        if (!element) return;
+
+        element.style.left =
+            current[id][0] + "%";
+
+        element.style.top =
+            current[id][1] + "%";
 
     });
 
-    updateNetworkInfo();
+    updateLabels();
 
 }
 
 
-/* =========================================================
-   GET DEVICE CENTER
-   ========================================================= */
+/* =====================================================
+   GET CENTER
+   ===================================================== */
 
-function getDeviceCenter(element) {
+function getCenter(element) {
 
     const canvasRect =
         canvas.getBoundingClientRect();
@@ -255,207 +261,246 @@ function getDeviceCenter(element) {
 }
 
 
-/* =========================================================
-   RESIZE SVG VIEWBOX
-   ========================================================= */
+/* =====================================================
+   DRAW CONNECTIONS
+   ===================================================== */
 
-function resizeSVG() {
+function drawConnections() {
 
-    const width =
-        canvas.clientWidth;
+    svg.innerHTML = "";
 
-    const height =
-        canvas.clientHeight;
+    const links =
+        topologies[currentTopology];
 
-    svg.setAttribute(
-        "viewBox",
-        `0 0 ${width} ${height}`
-    );
+    links.forEach((link, index) => {
 
-    drawConnections();
+        const from =
+            document.getElementById(
+                link[0]
+            );
+
+        const to =
+            document.getElementById(
+                link[1]
+            );
+
+        if (!from || !to) return;
+
+        const a =
+            getCenter(from);
+
+        const b =
+            getCenter(to);
+
+        const line =
+            document.createElementNS(
+                "http://www.w3.org/2000/svg",
+                "line"
+            );
+
+        line.setAttribute(
+            "x1",
+            a.x
+        );
+
+        line.setAttribute(
+            "y1",
+            a.y
+        );
+
+        line.setAttribute(
+            "x2",
+            b.x
+        );
+
+        line.setAttribute(
+            "y2",
+            b.y
+        );
+
+        line.classList.add(
+            "connection"
+        );
+
+        line.dataset.index =
+            index;
+
+        line.dataset.from =
+            link[0];
+
+        line.dataset.to =
+            link[1];
+
+        svg.appendChild(line);
+
+    });
+
+    document.getElementById(
+        "linkCount"
+    ).textContent =
+        links.length;
 
 }
 
 
-/* =========================================================
-   DEVICE CLICK
-   ========================================================= */
+/* =====================================================
+   UPDATE LABEL
+   ===================================================== */
 
-document
-    .querySelectorAll(".network-device")
-    .forEach(device => {
+function updateLabels() {
 
-        device.addEventListener(
-            "click",
-            () => {
-
-                const id =
-                    device.dataset.device;
-
-                openDeviceDetail(id);
-
-            }
+    const internet =
+        document.getElementById(
+            "labelInternet"
         );
 
-    });
-
-
-/* =========================================================
-   SIDEBAR DEVICE CLICK
-   ========================================================= */
-
-document
-    .querySelectorAll(".device-button")
-    .forEach(button => {
-
-        button.addEventListener(
-            "click",
-            () => {
-
-                const id =
-                    button.dataset.device;
-
-                const device =
-                    document.getElementById(id);
-
-                if (!device) return;
-
-                openDeviceDetail(id);
-
-            }
+    const lan =
+        document.getElementById(
+            "labelLan"
         );
 
-    });
+    if (currentTopology === "star") {
+
+        internet.style.display =
+            "block";
+
+        lan.style.display =
+            "block";
+
+        internet.style.left =
+            "50%";
+
+        internet.style.top =
+            "22%";
+
+        internet.style.transform =
+            "translateX(-50%)";
+
+        lan.style.left =
+            "50%";
+
+        lan.style.top =
+            "53%";
+
+        lan.style.transform =
+            "translateX(-50%)";
+
+    } else {
+
+        internet.style.display =
+            "none";
+
+        lan.style.display =
+            "none";
+
+    }
+
+}
 
 
-/* =========================================================
+/* =====================================================
    OPEN DETAIL
-   ========================================================= */
+   ===================================================== */
 
-function openDeviceDetail(id) {
+function openDetail(id) {
 
     const data =
         devices[id];
 
     if (!data) return;
 
-    selectedDevice = id;
+    selectedDevice =
+        id;
 
     document.getElementById(
         "detailIcon"
-    ).textContent = data.icon;
+    ).textContent =
+        data.icon;
 
     document.getElementById(
         "detailType"
-    ).textContent = data.type;
+    ).textContent =
+        data.type;
 
     document.getElementById(
         "detailName"
-    ).textContent = data.name;
+    ).textContent =
+        data.name;
 
     document.getElementById(
         "detailIP"
-    ).textContent = data.ip;
+    ).textContent =
+        data.ip;
 
     document.getElementById(
         "detailMAC"
-    ).textContent = data.mac;
+    ).textContent =
+        data.mac;
 
     document.getElementById(
         "detailDeviceType"
-    ).textContent = data.name;
+    ).textContent =
+        data.name;
 
     document.getElementById(
         "detailConnection"
-    ).textContent = data.connection;
+    ).textContent =
+        data.connection;
 
     document.getElementById(
         "detailDescription"
-    ).textContent = data.description;
+    ).textContent =
+        data.description;
 
     updateDetailStatus();
 
-    overlay.classList.add("show");
+    document
+        .getElementById(
+            "detailOverlay"
+        )
+        .classList.add(
+            "show"
+        );
 
 }
 
 
-/* =========================================================
-   CLOSE DETAIL
-   ========================================================= */
-
-document
-    .getElementById("closeDetail")
-    .addEventListener(
-        "click",
-        closeDetail
-    );
-
-
-overlay.addEventListener(
-    "click",
-    event => {
-
-        if (event.target === overlay) {
-
-            closeDetail();
-
-        }
-
-    }
-);
-
-
-function closeDetail() {
-
-    overlay.classList.remove("show");
-
-    selectedDevice = null;
-
-}
-
-
-/* =========================================================
-   UPDATE DETAIL STATUS
-   ========================================================= */
+/* =====================================================
+   DETAIL STATUS
+   ===================================================== */
 
 function updateDetailStatus() {
 
-    if (!selectedDevice) return;
-
-    const status =
+    const element =
         document.getElementById(
             "detailStatus"
         );
 
-    const toggle =
+    const button =
         document.getElementById(
             "toggleDevice"
         );
 
-    const online =
-        deviceStatus[selectedDevice];
+    if (status[selectedDevice]) {
 
-    if (online) {
+        element.innerHTML =
+            "<span></span> ONLINE";
 
-        status.innerHTML =
-            `<span></span> ONLINE`;
-
-        status.style.color =
+        element.style.color =
             "var(--green)";
 
-        toggle.textContent =
+        button.textContent =
             "TURN OFF";
 
     } else {
 
-        status.innerHTML =
-            `<span></span> OFFLINE`;
+        element.innerHTML =
+            "<span></span> OFFLINE";
 
-        status.style.color =
+        element.style.color =
             "var(--red)";
 
-        toggle.textContent =
+        button.textContent =
             "TURN ON";
 
     }
@@ -463,20 +508,122 @@ function updateDetailStatus() {
 }
 
 
-/* =========================================================
-   TOGGLE DEVICE
-   ========================================================= */
+/* =====================================================
+   CLOSE DETAIL
+   ===================================================== */
+
+function closeDetail() {
+
+    document
+        .getElementById(
+            "detailOverlay"
+        )
+        .classList.remove(
+            "show"
+        );
+
+    selectedDevice =
+        null;
+
+}
+
 
 document
-    .getElementById("toggleDevice")
+    .getElementById(
+        "closeDetail"
+    )
+    .addEventListener(
+        "click",
+        closeDetail
+    );
+
+
+document
+    .getElementById(
+        "detailOverlay"
+    )
+    .addEventListener(
+        "click",
+        event => {
+
+            if (
+                event.target.id ===
+                "detailOverlay"
+            ) {
+
+                closeDetail();
+
+            }
+
+        }
+    );
+
+
+/* =====================================================
+   DEVICE CLICK
+   ===================================================== */
+
+document
+    .querySelectorAll(
+        ".network-device"
+    )
+    .forEach(device => {
+
+        device.addEventListener(
+            "click",
+            () => {
+
+                openDetail(
+                    device.dataset.device
+                );
+
+            }
+        );
+
+    });
+
+
+/* =====================================================
+   SIDEBAR DEVICE CLICK
+   ===================================================== */
+
+document
+    .querySelectorAll(
+        ".device-menu-item"
+    )
+    .forEach(button => {
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                openDetail(
+                    button.dataset.device
+                );
+
+            }
+        );
+
+    });
+
+
+/* =====================================================
+   TOGGLE DEVICE
+   ===================================================== */
+
+document
+    .getElementById(
+        "toggleDevice"
+    )
     .addEventListener(
         "click",
         () => {
 
-            if (!selectedDevice) return;
+            if (!selectedDevice)
+                return;
 
-            deviceStatus[selectedDevice] =
-                !deviceStatus[selectedDevice];
+            status[selectedDevice] =
+                !status[selectedDevice];
 
             updateDeviceVisual(
                 selectedDevice
@@ -484,22 +631,23 @@ document
 
             updateDetailStatus();
 
-            const state =
-                deviceStatus[selectedDevice]
-                    ? "ONLINE"
-                    : "OFFLINE";
-
             addLog(
-                `${devices[selectedDevice].name} berubah menjadi ${state}.`
+                devices[selectedDevice].name +
+                " sekarang " +
+                (
+                    status[selectedDevice]
+                        ? "ONLINE"
+                        : "OFFLINE"
+                )
             );
 
         }
     );
 
 
-/* =========================================================
-   DEVICE VISUAL STATUS
-   ========================================================= */
+/* =====================================================
+   UPDATE VISUAL DEVICE
+   ===================================================== */
 
 function updateDeviceVisual(id) {
 
@@ -508,19 +656,24 @@ function updateDeviceVisual(id) {
 
     if (!element) return;
 
-    if (deviceStatus[id]) {
+    const state =
+        element.querySelector(
+            "small"
+        );
+
+    const dot =
+        state.querySelector(
+            "i"
+        );
+
+    if (status[id]) {
 
         element.classList.remove(
             "offline"
         );
 
-        const state =
-            element.querySelector(
-                ".device-state"
-            );
-
-        state.innerHTML =
-            `<span></span> ONLINE`;
+        state.lastChild.textContent =
+            "ONLINE";
 
     } else {
 
@@ -528,118 +681,93 @@ function updateDeviceVisual(id) {
             "offline"
         );
 
-        const state =
-            element.querySelector(
-                ".device-state"
-            );
-
-        state.innerHTML =
-            `<span></span> OFFLINE`;
+        state.lastChild.textContent =
+            "OFFLINE";
 
     }
 
 }
 
 
-/* =========================================================
+/* =====================================================
    SEND DATA
-   ========================================================= */
+   ===================================================== */
 
-document
-    .getElementById("sendPacket")
-    .addEventListener(
-        "click",
-        () => {
+function sendData() {
 
-            sendDataPacket();
+    const links =
+        topologies[currentTopology];
 
-        }
-    );
+    let link = null;
 
+    for (const current of links) {
 
-document
-    .getElementById("sendFromDevice")
-    .addEventListener(
-        "click",
-        () => {
+        if (
+            status[current[0]] &&
+            status[current[1]]
+        ) {
 
-            closeDetail();
+            link =
+                current;
 
-            sendDataPacket();
+            break;
 
         }
-    );
 
+    }
 
-/* =========================================================
-   SEND PACKET ANIMATION
-   ========================================================= */
-
-function sendDataPacket() {
-
-    const connections =
-        topologyConnections[currentTopology];
-
-    if (!connections.length) return;
-
-    const activeConnection =
-        connections.find(
-            connection => {
-
-                return (
-                    deviceStatus[connection[0]] &&
-                    deviceStatus[connection[1]]
-                );
-
-            }
-        );
-
-    if (!activeConnection) {
+    if (!link) {
 
         addLog(
-            "Tidak ada jalur aktif untuk mengirim data."
+            "Tidak ada koneksi aktif."
         );
 
         return;
 
     }
 
-    const [from, to] =
-        activeConnection;
-
     animatePacket(
-        from,
-        to
+        link[0],
+        link[1]
     );
 
     addLog(
-        `Data dikirim dari ${devices[from].name} menuju ${devices[to].name}.`
+        "Data dikirim dari " +
+        devices[link[0]].name +
+        " menuju " +
+        devices[link[1]].name
     );
 
 }
 
 
-/* =========================================================
-   ANIMATE PACKET
-   ========================================================= */
+/* =====================================================
+   PACKET ANIMATION
+   ===================================================== */
 
-function animatePacket(fromId, toId) {
+function animatePacket(
+    fromId,
+    toId
+) {
 
     const from =
-        document.getElementById(fromId);
+        document.getElementById(
+            fromId
+        );
 
     const to =
-        document.getElementById(toId);
-
-    if (!from || !to) return;
+        document.getElementById(
+            toId
+        );
 
     const start =
-        getDeviceCenter(from);
+        getCenter(from);
 
     const end =
-        getDeviceCenter(to);
+        getCenter(to);
 
-    const duration = 1100;
+    const duration =
+        1200;
 
     const startTime =
         performance.now();
@@ -647,46 +775,37 @@ function animatePacket(fromId, toId) {
     packet.style.display =
         "flex";
 
-    function animation(currentTime) {
 
-        const elapsed =
-            currentTime - startTime;
+    function animate(time) {
 
         const progress =
             Math.min(
-                elapsed / duration,
+                (time - startTime) /
+                duration,
                 1
             );
-
-        const eased =
-            progress < 0.5
-                ? 2 * progress * progress
-                : 1 -
-                  Math.pow(
-                      -2 * progress + 2,
-                      2
-                  ) / 2;
 
         const x =
             start.x +
             (end.x - start.x) *
-            eased;
+            progress;
 
         const y =
             start.y +
             (end.y - start.y) *
-            eased;
+            progress;
 
         packet.style.left =
-            `${x}px`;
+            x + "px";
 
         packet.style.top =
-            `${y}px`;
+            y + "px";
+
 
         if (progress < 1) {
 
             requestAnimationFrame(
-                animation
+                animate
             );
 
         } else {
@@ -694,7 +813,7 @@ function animatePacket(fromId, toId) {
             packet.style.display =
                 "none";
 
-            highlightConnection(
+            highlightLink(
                 fromId,
                 toId
             );
@@ -704,37 +823,42 @@ function animatePacket(fromId, toId) {
     }
 
     requestAnimationFrame(
-        animation
+        animate
     );
 
 }
 
 
-/* =========================================================
-   HIGHLIGHT CONNECTION
-   ========================================================= */
+/* =====================================================
+   HIGHLIGHT LINK
+   ===================================================== */
 
-function highlightConnection(
+function highlightLink(
     from,
     to
 ) {
 
     const lines =
         document.querySelectorAll(
-            ".connection-line"
+            ".connection"
         );
 
     lines.forEach(line => {
 
         if (
+
             (
                 line.dataset.from === from &&
                 line.dataset.to === to
-            ) ||
+            )
+
+            ||
+
             (
                 line.dataset.from === to &&
                 line.dataset.to === from
             )
+
         ) {
 
             line.classList.add(
@@ -749,7 +873,7 @@ function highlightConnection(
                     );
 
                 },
-                700
+                800
             );
 
         }
@@ -759,245 +883,105 @@ function highlightConnection(
 }
 
 
-/* =========================================================
-   TOPOLOGY CHANGE
-   ========================================================= */
-
-topologySelect.addEventListener(
-    "change",
-    () => {
-
-        currentTopology =
-            topologySelect.value;
-
-        updateDevicePositions();
-
-        setTimeout(
-            () => {
-
-                drawConnections();
-
-            },
-            50
-        );
-
-        addLog(
-            `Topologi diubah menjadi ${getTopologyName(currentTopology)}.`
-        );
-
-    }
-);
-
-
-/* =========================================================
-   TOPOLOGY NAMES
-   ========================================================= */
-
-function getTopologyName(type) {
-
-    const names = {
-
-        star: "Star Topology",
-
-        tree: "Tree Topology",
-
-        bus: "Bus Topology",
-
-        ring: "Ring Topology"
-
-    };
-
-    return names[type];
-
-}
-
-
-/* =========================================================
-   UPDATE DEVICE POSITIONS
-   ========================================================= */
-
-function updateDevicePositions() {
-
-    const positions = {
-
-        star: {
-
-            router: [50, 9],
-
-            switch: [50, 35],
-
-            pc1: [18, 68],
-
-            pc2: [39, 68],
-
-            server: [61, 68],
-
-            ap: [82, 68]
-
-        },
-
-        tree: {
-
-            router: [50, 9],
-
-            switch: [50, 34],
-
-            pc1: [28, 60],
-
-            pc2: [50, 60],
-
-            server: [50, 84],
-
-            ap: [72, 60]
-
-        },
-
-        bus: {
-
-            router: [10, 50],
-
-            switch: [28, 50],
-
-            pc1: [45, 50],
-
-            pc2: [62, 50],
-
-            server: [78, 50],
-
-            ap: [92, 50]
-
-        },
-
-        ring: {
-
-            router: [50, 12],
-
-            switch: [78, 30],
-
-            server: [78, 68],
-
-            ap: [50, 86],
-
-            pc2: [22, 68],
-
-            pc1: [22, 30]
-
-        }
-
-    };
-
-    const selected =
-        positions[currentTopology];
-
-    Object.keys(selected)
-        .forEach(id => {
-
-            const element =
-                document.getElementById(id);
-
-            const [x, y] =
-                selected[id];
-
-            element.style.left =
-                `${x}%`;
-
-            element.style.top =
-                `${y}%`;
-
-        });
-
-    updateLabels();
-
-}
-
-
-/* =========================================================
-   UPDATE LABELS
-   ========================================================= */
-
-function updateLabels() {
-
-    const routerLabel =
-        document.querySelector(
-            ".label-router"
-        );
-
-    const switchLabel =
-        document.querySelector(
-            ".label-switch"
-        );
-
-    if (currentTopology === "star") {
-
-        routerLabel.style.display =
-            "block";
-
-        switchLabel.style.display =
-            "block";
-
-        routerLabel.textContent =
-            "INTERNET";
-
-        switchLabel.textContent =
-            "LAN";
-
-    }
-
-    else if (currentTopology === "tree") {
-
-        routerLabel.style.display =
-            "block";
-
-        switchLabel.style.display =
-            "none";
-
-        routerLabel.textContent =
-            "ROOT";
-
-    }
-
-    else {
-
-        routerLabel.style.display =
-            "none";
-
-        switchLabel.style.display =
-            "none";
-
-    }
-
-}
-
-
-/* =========================================================
-   RESET NETWORK
-   ========================================================= */
+/* =====================================================
+   SEND BUTTON
+   ===================================================== */
 
 document
-    .getElementById("resetNetwork")
+    .getElementById(
+        "sendPacket"
+    )
+    .addEventListener(
+        "click",
+        sendData
+    );
+
+
+document
+    .getElementById(
+        "sendFromDevice"
+    )
     .addEventListener(
         "click",
         () => {
 
-            Object.keys(deviceStatus)
+            closeDetail();
+
+            sendData();
+
+        }
+    );
+
+
+/* =====================================================
+   TOPOLOGY SELECT
+   ===================================================== */
+
+document
+    .getElementById(
+        "topologySelect"
+    )
+    .addEventListener(
+        "change",
+        event => {
+
+            currentTopology =
+                event.target.value;
+
+            positionDevices();
+
+            setTimeout(
+                drawConnections,
+                50
+            );
+
+            addLog(
+                "Topologi diubah menjadi " +
+                currentTopology.toUpperCase()
+            );
+
+        }
+    );
+
+
+/* =====================================================
+   RESET
+   ===================================================== */
+
+document
+    .getElementById(
+        "resetNetwork"
+    )
+    .addEventListener(
+        "click",
+        () => {
+
+            Object.keys(status)
                 .forEach(id => {
 
-                    deviceStatus[id] =
+                    status[id] =
                         true;
 
-                    updateDeviceVisual(id);
+                    updateDeviceVisual(
+                        id
+                    );
 
                 });
 
             currentTopology =
                 "star";
 
-            topologySelect.value =
+            document.getElementById(
+                "topologySelect"
+            ).value =
                 "star";
 
-            updateDevicePositions();
+            positionDevices();
 
-            drawConnections();
+            setTimeout(
+                drawConnections,
+                50
+            );
 
             addLog(
                 "Network berhasil di-reset."
@@ -1007,33 +991,44 @@ document
     );
 
 
-/* =========================================================
+/* =====================================================
    CLEAR LOG
-   ========================================================= */
+   ===================================================== */
 
 document
-    .getElementById("clearLog")
+    .getElementById(
+        "clearLog"
+    )
     .addEventListener(
         "click",
         () => {
 
-            logContent.innerHTML = "";
+            document.getElementById(
+                "logContent"
+            ).innerHTML = "";
 
         }
     );
 
 
-/* =========================================================
-   NETWORK LOG
-   ========================================================= */
+/* =====================================================
+   LOG
+   ===================================================== */
 
 function addLog(message) {
 
-    const item =
-        document.createElement("div");
+    const container =
+        document.getElementById(
+            "logContent"
+        );
 
-    item.className =
-        "log-item";
+    const row =
+        document.createElement(
+            "div"
+        );
+
+    row.className =
+        "log-row";
 
     const time =
         new Date()
@@ -1046,84 +1041,59 @@ function addLog(message) {
                 }
             );
 
-    item.innerHTML = `
-
-        <span class="log-time">
-            ${time}
-        </span>
-
-        <span>
-            ${message}
-        </span>
-
+    row.innerHTML = `
+        <span>${time}</span>
+        ${message}
     `;
 
-    logContent.prepend(item);
+    container.prepend(row);
 
 }
 
 
-/* =========================================================
-   UPDATE NETWORK INFO
-   ========================================================= */
+/* =====================================================
+   INITIALIZE
+   ===================================================== */
 
-function updateNetworkInfo() {
+function initialize() {
 
-    const connections =
-        topologyConnections[currentTopology];
+    positionDevices();
+
+    Object.keys(status)
+        .forEach(
+            updateDeviceVisual
+        );
+
+    setTimeout(
+        drawConnections,
+        100
+    );
 
     document.getElementById(
         "deviceCount"
     ).textContent =
         Object.keys(devices).length;
 
-    document.getElementById(
-        "linkCount"
-    ).textContent =
-        connections.length;
-
 }
 
 
-/* =========================================================
-   INITIALIZE
-   ========================================================= */
-
-window.addEventListener(
-    "load",
-    () => {
-
-        updateDevicePositions();
-
-        setTimeout(
-            () => {
-
-                resizeSVG();
-
-            },
-            100
-        );
-
-        Object.keys(deviceStatus)
-            .forEach(updateDeviceVisual);
-
-        addLog(
-            "Interactive topology siap digunakan."
-        );
-
-    }
-);
-
-
-/* =========================================================
-   WINDOW RESIZE
-   ========================================================= */
+/* =====================================================
+   RESIZE
+   ===================================================== */
 
 window.addEventListener(
     "resize",
     () => {
 
-        resizeSVG();
+        drawConnections();
 
     }
+);
+
+
+/* START */
+
+window.addEventListener(
+    "load",
+    initialize
 );
