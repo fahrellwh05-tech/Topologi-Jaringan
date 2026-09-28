@@ -1,1312 +1,1743 @@
-/* =========================================================
-   NETWORK TOPOLOGY SIMULATOR
-   STAR / TREE / BUS / RING
-========================================================= */
-
-const canvas = document.getElementById("networkCanvas");
-const svg = document.getElementById("connectionSvg");
-const packet = document.getElementById("packet");
-const busLine = document.getElementById("busLine");
-
-const sendBtn = document.getElementById("sendBtn");
-const resetBtn = document.getElementById("resetBtn");
-
-const packetCountEl = document.getElementById("packetCount");
-const hopCountEl = document.getElementById("hopCount");
-const latencyEl = document.getElementById("latency");
-const packetStatusEl = document.getElementById("packetStatus");
-
-const titleEl = document.getElementById("title");
-const descriptionEl = document.getElementById("description");
-const currentModeEl = document.getElementById("currentMode");
-const activityLog = document.getElementById("activityLog");
-const logStatus = document.getElementById("logStatus");
-
-let currentTopology = "star";
-let packetCount = 0;
-let hopCount = 0;
-let running = false;
+"use strict";
 
 
 /* =========================================================
-   DEVICE ELEMENT
+   WAIT FOR HTML
 ========================================================= */
 
-const devices = {
-    router: document.getElementById("router"),
-    switch: document.getElementById("switch"),
-    pc1: document.getElementById("pc1"),
-    pc2: document.getElementById("pc2"),
-    server: document.getElementById("server"),
-    ap: document.getElementById("ap")
-};
+document.addEventListener("DOMContentLoaded", function () {
 
 
-/* =========================================================
-   TOPOLOGY INFORMATION
-========================================================= */
+    /* =====================================================
+       GET ELEMENT
+    ===================================================== */
 
-const topologyInfo = {
+    const canvas =
+        document.getElementById("networkCanvas");
 
-    star: {
-        title: "STAR TOPOLOGY",
+    const svg =
+        document.getElementById("networkSvg");
 
-        description:
-            "Semua perangkat terhubung melalui satu switch pusat.",
+    const packet =
+        document.getElementById("packet");
 
-        positions: {
-            router: [50, 14],
-            switch: [50, 50],
-            pc1: [18, 76],
-            pc2: [38, 86],
-            server: [82, 76],
-            ap: [62, 86]
-        }
-    },
+    const busLine =
+        document.getElementById("busLine");
 
-    tree: {
-        title: "TREE TOPOLOGY",
+    const sendBtn =
+        document.getElementById("sendBtn");
 
-        description:
-            "Data bergerak secara hierarki dari root menuju cabang dan perangkat tujuan.",
+    const resetBtn =
+        document.getElementById("resetBtn");
 
-        positions: {
-            router: [50, 12],
-            switch: [50, 36],
-            pc1: [20, 64],
-            pc2: [43, 64],
-            server: [70, 64],
-            ap: [88, 64]
-        }
-    },
+    const pageTitle =
+        document.getElementById("pageTitle");
 
-    bus: {
-        title: "BUS TOPOLOGY",
+    const pageDescription =
+        document.getElementById("pageDescription");
 
-        description:
-            "Semua perangkat menggunakan satu backbone jaringan bersama.",
+    const currentMode =
+        document.getElementById("currentMode");
 
-        positions: {
-            router: [10, 50],
-            pc1: [27, 28],
-            switch: [43, 50],
-            pc2: [58, 72],
-            server: [75, 28],
-            ap: [90, 50]
-        }
-    },
+    const packetCountEl =
+        document.getElementById("packetCount");
 
-    ring: {
-        title: "RING TOPOLOGY",
+    const hopCountEl =
+        document.getElementById("hopCount");
 
-        description:
-            "Perangkat membentuk jalur melingkar dan paket berjalan mengikuti arah ring.",
+    const latencyEl =
+        document.getElementById("latency");
 
-        positions: {
-            router: [50, 15],
-            switch: [80, 34],
-            server: [80, 70],
-            ap: [50, 87],
-            pc2: [20, 70],
-            pc1: [20, 34]
-        }
-    }
-};
+    const packetStatusEl =
+        document.getElementById("packetStatus");
+
+    const logStatus =
+        document.getElementById("logStatus");
+
+    const activityLog =
+        document.getElementById("activityLog");
 
 
-/* =========================================================
-   TOPOLOGY LINKS
-========================================================= */
+    /* =====================================================
+       DEVICE
+    ===================================================== */
 
-const links = {
+    const device = {
 
-    star: [
-        ["router", "switch"],
-        ["switch", "pc1"],
-        ["switch", "pc2"],
-        ["switch", "server"],
-        ["switch", "ap"]
-    ],
+        router:
+            document.getElementById("router"),
 
-    tree: [
-        ["router", "switch"],
-        ["switch", "pc1"],
-        ["switch", "pc2"],
-        ["pc2", "server"],
-        ["pc2", "ap"]
-    ],
+        switch:
+            document.getElementById("switch"),
 
-    bus: [
-        ["router", "switch"],
-        ["switch", "ap"]
-    ],
+        pc1:
+            document.getElementById("pc1"),
 
-    ring: [
-        ["router", "switch"],
-        ["switch", "server"],
-        ["server", "ap"],
-        ["ap", "pc2"],
-        ["pc2", "pc1"],
-        ["pc1", "router"]
-    ]
-};
+        pc2:
+            document.getElementById("pc2"),
 
+        server:
+            document.getElementById("server"),
 
-/* =========================================================
-   UTILITIES
-========================================================= */
+        ap:
+            document.getElementById("ap")
 
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-
-function setDevicePosition(id, x, y) {
-    devices[id].style.left = `${x}%`;
-    devices[id].style.top = `${y}%`;
-}
-
-
-function clearDeviceStates() {
-
-    Object.values(devices).forEach(device => {
-
-        device.classList.remove(
-            "active",
-            "receive",
-            "ring-active"
-        );
-
-    });
-}
-
-
-function clearSvg() {
-    svg.innerHTML = "";
-}
-
-
-function setPacketPosition(x, y) {
-
-    packet.style.left = `${x}px`;
-    packet.style.top = `${y}px`;
-}
-
-
-function getPosition(id) {
-
-    const rect = devices[id].getBoundingClientRect();
-    const canvasRect = canvas.getBoundingClientRect();
-
-    return {
-        x: rect.left - canvasRect.left + rect.width / 2,
-        y: rect.top - canvasRect.top + rect.height / 2
     };
-}
 
 
-/* =========================================================
-   LOG
-========================================================= */
+    /* =====================================================
+       VARIABLES
+    ===================================================== */
 
-function addLog(message) {
+    let topology = "star";
 
-    const now = new Date();
+    let packets = 0;
 
-    const time =
-        now.getHours().toString().padStart(2, "0") +
-        ":" +
-        now.getMinutes().toString().padStart(2, "0") +
-        ":" +
-        now.getSeconds().toString().padStart(2, "0");
+    let hops = 0;
 
-    const item = document.createElement("div");
+    let running = false;
 
-    item.className = "log-item";
 
-    item.innerHTML = `
-        <span class="log-time">${time}</span>
-        <span>${message}</span>
-    `;
+    /* =====================================================
+       TOPOLOGY DATA
+    ===================================================== */
 
-    activityLog.prepend(item);
+    const data = {
 
-    while (activityLog.children.length > 12) {
-        activityLog.removeChild(activityLog.lastChild);
-    }
-}
+        star: {
 
+            title:
+                "STAR TOPOLOGY",
 
-/* =========================================================
-   DRAW NORMAL CONNECTION
-========================================================= */
+            description:
+                "Semua perangkat terhubung melalui satu switch pusat.",
 
-function drawLine(id1, id2, className = "") {
+            positions: {
 
-    const p1 = getPosition(id1);
-    const p2 = getPosition(id2);
+                router: [50, 15],
 
-    const line = document.createElementNS(
-        "http://www.w3.org/2000/svg",
-        "line"
-    );
+                switch: [50, 48],
 
-    line.setAttribute("x1", p1.x);
-    line.setAttribute("y1", p1.y);
-    line.setAttribute("x2", p2.x);
-    line.setAttribute("y2", p2.y);
+                pc1: [18, 78],
 
-    line.classList.add("connection");
+                pc2: [39, 86],
 
-    if (className) {
-        line.classList.add(className);
-    }
+                server: [82, 78],
 
-    svg.appendChild(line);
-
-    return line;
-}
-
-
-/* =========================================================
-   DRAW TOPOLOGY
-========================================================= */
-
-function drawTopology() {
-
-    clearSvg();
-
-    busLine.style.display = "none";
-
-    const data = topologyInfo[currentTopology];
-
-    Object.entries(data.positions).forEach(([id, pos]) => {
-        setDevicePosition(id, pos[0], pos[1]);
-    });
-
-    /*
-       Give browser time to update positions
-       before calculating line coordinates.
-    */
-
-    requestAnimationFrame(() => {
-
-        clearSvg();
-
-        if (currentTopology === "bus") {
-
-            drawBusTopology();
-
-        } else {
-
-            links[currentTopology].forEach(link => {
-
-                drawLine(link[0], link[1]);
-
-            });
-
-        }
-
-        if (currentTopology === "ring") {
-            createRingDecoration();
-        }
-
-    });
-}
-
-
-/* =========================================================
-   BUS TOPOLOGY DRAW
-========================================================= */
-
-function drawBusTopology() {
-
-    const p1 = getPosition("router");
-    const p2 = getPosition("ap");
-
-    busLine.style.display = "block";
-
-    busLine.style.left = `${p1.x}px`;
-    busLine.style.top = `${p1.y - 3}px`;
-
-    busLine.style.width = `${p2.x - p1.x}px`;
-
-    /*
-       Vertical taps from devices to backbone.
-    */
-
-    const taps = [
-        ["pc1", "bus"],
-        ["pc2", "bus"],
-        ["server", "bus"]
-    ];
-
-    taps.forEach(([id]) => {
-
-        const p = getPosition(id);
-
-        const line = document.createElementNS(
-            "http://www.w3.org/2000/svg",
-            "line"
-        );
-
-        line.setAttribute("x1", p.x);
-        line.setAttribute("y1", p.y);
-        line.setAttribute("x2", p.x);
-        line.setAttribute("y2", getPosition("router").y);
-
-        line.classList.add("connection");
-
-        svg.appendChild(line);
-    });
-}
-
-
-/* =========================================================
-   RING DECORATION
-========================================================= */
-
-function createRingDecoration() {
-
-    const order = [
-        "router",
-        "switch",
-        "server",
-        "ap",
-        "pc2",
-        "pc1"
-    ];
-
-    const points = order.map(id => getPosition(id));
-
-    let d = `M ${points[0].x} ${points[0].y}`;
-
-    for (let i = 1; i < points.length; i++) {
-
-        d += ` L ${points[i].x} ${points[i].y}`;
-
-    }
-
-    d += ` L ${points[0].x} ${points[0].y}`;
-
-    const path = document.createElementNS(
-        "http://www.w3.org/2000/svg",
-        "path"
-    );
-
-    path.setAttribute("d", d);
-    path.classList.add("connection");
-
-    svg.appendChild(path);
-}
-
-
-/* =========================================================
-   ACTIVATE CONNECTION
-========================================================= */
-
-function activateConnection(id1, id2, className = "active") {
-
-    const lines = svg.querySelectorAll(".connection");
-
-    const p1 = getPosition(id1);
-    const p2 = getPosition(id2);
-
-    lines.forEach(line => {
-
-        const x1 = Number(line.getAttribute("x1"));
-        const y1 = Number(line.getAttribute("y1"));
-        const x2 = Number(line.getAttribute("x2"));
-        const y2 = Number(line.getAttribute("y2"));
-
-        const match =
-            (
-                Math.abs(x1 - p1.x) < 3 &&
-                Math.abs(y1 - p1.y) < 3 &&
-                Math.abs(x2 - p2.x) < 3 &&
-                Math.abs(y2 - p2.y) < 3
-            )
-            ||
-            (
-                Math.abs(x1 - p2.x) < 3 &&
-                Math.abs(y1 - p2.y) < 3 &&
-                Math.abs(x2 - p1.x) < 3 &&
-                Math.abs(y2 - p1.y) < 3
-            );
-
-        if (match) {
-            line.classList.add(className);
-        }
-    });
-}
-
-
-/* =========================================================
-   MOVE PACKET STRAIGHT
-========================================================= */
-
-function movePacketTo(id, duration = 900) {
-
-    const target = getPosition(id);
-
-    return movePacketXY(
-        target.x,
-        target.y,
-        duration
-    );
-}
-
-
-function movePacketXY(targetX, targetY, duration = 900) {
-
-    const startX =
-        parseFloat(packet.style.left) || 0;
-
-    const startY =
-        parseFloat(packet.style.top) || 0;
-
-    return new Promise(resolve => {
-
-        const startTime = performance.now();
-
-        function animate(now) {
-
-            const progress =
-                Math.min(
-                    (now - startTime) / duration,
-                    1
-                );
-
-            /*
-               Smooth ease-in-out
-            */
-
-            const eased =
-                progress < 0.5
-                    ? 2 * progress * progress
-                    : 1 - Math.pow(
-                        -2 * progress + 2,
-                        2
-                    ) / 2;
-
-            const x =
-                startX +
-                (targetX - startX) * eased;
-
-            const y =
-                startY +
-                (targetY - startY) * eased;
-
-            setPacketPosition(x, y);
-
-            if (progress < 1) {
-
-                requestAnimationFrame(animate);
-
-            } else {
-
-                resolve();
+                ap: [62, 86]
 
             }
+
+        },
+
+
+        tree: {
+
+            title:
+                "TREE TOPOLOGY",
+
+            description:
+                "Data bergerak secara hierarki dari root menuju cabang.",
+
+            positions: {
+
+                router: [50, 13],
+
+                switch: [50, 34],
+
+                pc1: [20, 63],
+
+                pc2: [43, 63],
+
+                server: [70, 63],
+
+                ap: [88, 63]
+
+            }
+
+        },
+
+
+        bus: {
+
+            title:
+                "BUS TOPOLOGY",
+
+            description:
+                "Semua perangkat menggunakan satu jalur backbone bersama.",
+
+            positions: {
+
+                router: [10, 50],
+
+                pc1: [27, 27],
+
+                switch: [43, 50],
+
+                pc2: [58, 73],
+
+                server: [75, 27],
+
+                ap: [90, 50]
+
+            }
+
+        },
+
+
+        ring: {
+
+            title:
+                "RING TOPOLOGY",
+
+            description:
+                "Perangkat membentuk jalur melingkar.",
+
+            positions: {
+
+                router: [50, 14],
+
+                switch: [80, 34],
+
+                server: [80, 70],
+
+                ap: [50, 87],
+
+                pc2: [20, 70],
+
+                pc1: [20, 34]
+
+            }
+
         }
 
-        requestAnimationFrame(animate);
-    });
-}
+    };
 
 
-/* =========================================================
-   DEVICE PULSE
-========================================================= */
+    /* =====================================================
+       SLEEP
+    ===================================================== */
 
-async function pulseDevice(
-    id,
-    className = "active",
-    duration = 450
-) {
+    function sleep(ms) {
 
-    devices[id].classList.add(className);
-
-    await sleep(duration);
-
-    devices[id].classList.remove(className);
-}
-
-
-/* =========================================================
-   PACKET TRAIL
-========================================================= */
-
-function createTrail() {
-
-    const trail = document.createElement("div");
-
-    trail.className = "packet-trail";
-
-    trail.style.left = packet.style.left;
-    trail.style.top = packet.style.top;
-
-    canvas.appendChild(trail);
-
-    setTimeout(() => {
-
-        trail.style.opacity = "0";
-
-        setTimeout(() => {
-            trail.remove();
-        }, 400);
-
-    }, 50);
-}
-
-
-/* =========================================================
-   STAR ANIMATION
-=========================================================
-
-   STAR:
-   ROUTER
-      ↓
-   SWITCH
-      ↓
-   DISTRIBUTION
-      ↓
-   SERVER
-
-   Ciri khas:
-   - Switch menjadi pusat
-   - Packet masuk ke switch
-   - Switch melakukan broadcast/pulse
-   - Jalur switch-server menyala
-========================================================= */
-
-async function animateStar() {
-
-    addLog("STAR: Router mengirim packet ke switch.");
-
-    hopCount = 1;
-    updateStats();
-
-    await movePacketTo("switch", 1000);
-
-    await pulseDevice("switch", "active", 500);
-
-    addLog("STAR: Switch menerima packet.");
-
-    /*
-       Broadcast effect
-    */
-
-    const targets = [
-        "pc1",
-        "pc2",
-        "server",
-        "ap"
-    ];
-
-    for (const id of targets) {
-
-        devices[id].classList.add("active");
-
-        await sleep(100);
+        return new Promise(
+            resolve => setTimeout(resolve, ms)
+        );
 
     }
 
-    await sleep(350);
 
-    devices.pc1.classList.remove("active");
-    devices.pc2.classList.remove("active");
-    devices.ap.classList.remove("active");
+    /* =====================================================
+       APPLY POSITIONS
+    ===================================================== */
 
-    /*
-       Actual packet continues to server.
-    */
+    function applyPositions() {
 
-    activateConnection(
-        "switch",
-        "server",
-        "active"
-    );
+        const positions =
+            data[topology].positions;
 
-    hopCount = 2;
-    updateStats();
+        for (const id in positions) {
 
-    addLog("STAR: Switch meneruskan packet ke SERVER.");
+            device[id].style.left =
+                positions[id][0] + "%";
 
-    await movePacketTo("server", 1100);
+            device[id].style.top =
+                positions[id][1] + "%";
 
-    await pulseDevice(
-        "server",
-        "receive",
-        800
-    );
+        }
 
-    addLog("STAR: Data berhasil diterima SERVER.");
-
-}
+    }
 
 
-/* =========================================================
-   TREE ANIMATION
-=========================================================
+    /* =====================================================
+       GET POSITION
+    ===================================================== */
 
-   TREE:
-              ROUTER
-                 ↓
-              SWITCH
-             /     \
-           PC1      PC2
-                     ↓
-                   SERVER
+    function getPosition(id) {
 
-   Ciri khas:
-   - Hierarchical
-   - Tidak broadcast
-   - Packet turun level demi level
-========================================================= */
+        const rect =
+            device[id].getBoundingClientRect();
 
-async function animateTree() {
+        const canvasRect =
+            canvas.getBoundingClientRect();
 
-    addLog("TREE: Packet mulai dari root ROUTER.");
+        return {
 
-    hopCount = 1;
-    updateStats();
+            x:
+                rect.left -
+                canvasRect.left +
+                rect.width / 2,
 
-    await movePacketTo("switch", 900);
+            y:
+                rect.top -
+                canvasRect.top +
+                rect.height / 2
 
-    await pulseDevice(
-        "switch",
-        "active",
-        400
-    );
+        };
 
-    addLog("TREE: Packet turun ke cabang SWITCH.");
-
-    /*
-       Packet memilih cabang PC2.
-    */
-
-    activateConnection(
-        "switch",
-        "pc2",
-        "active"
-    );
-
-    hopCount = 2;
-    updateStats();
-
-    addLog("TREE: Packet masuk ke cabang PC2.");
-
-    await movePacketTo("pc2", 900);
-
-    await pulseDevice(
-        "pc2",
-        "active",
-        350
-    );
-
-    /*
-       Dari PC2 turun lagi ke SERVER.
-    */
-
-    activateConnection(
-        "pc2",
-        "server",
-        "active"
-    );
-
-    hopCount = 3;
-    updateStats();
-
-    addLog("TREE: PC2 meneruskan packet ke SERVER.");
-
-    await movePacketTo("server", 1000);
-
-    await pulseDevice(
-        "server",
-        "receive",
-        800
-    );
-
-    addLog("TREE: Data berhasil mencapai SERVER.");
-
-}
+    }
 
 
-/* =========================================================
-   BUS ANIMATION
-=========================================================
+    /* =====================================================
+       LOG
+    ===================================================== */
 
-   BUS:
+    function log(message) {
 
-   ROUTER ========================================= AP
-            ↑        ↑       ↑       ↑
-           PC1      SW      PC2    SERVER
+        const now =
+            new Date();
 
-   Ciri khas:
-   - Packet berjalan sepanjang backbone
-   - Tidak pindah router -> switch -> server
-   - Semua node mendengarkan jalur bersama
-========================================================= */
+        const time =
+            now.getHours()
+                .toString()
+                .padStart(2, "0")
+            +
+            ":"
+            +
+            now.getMinutes()
+                .toString()
+                .padStart(2, "0")
+            +
+            ":"
+            +
+            now.getSeconds()
+                .toString()
+                .padStart(2, "0");
 
-async function animateBus() {
 
-    addLog("BUS: Packet masuk ke shared backbone.");
+        const row =
+            document.createElement("div");
 
-    busLine.classList.add(
-        "active",
-        "bus-flow"
-    );
+        row.className =
+            "log-item";
 
-    /*
-       Start dari ROUTER
-    */
+        row.innerHTML = `
+            <span>${time}</span>
+            <p>${message}</p>
+        `;
 
-    const start = getPosition("router");
+        activityLog.prepend(row);
 
-    setPacketPosition(
-        start.x,
-        start.y
-    );
+    }
 
-    /*
-       Packet bergerak sepanjang garis BUS.
-    */
 
-    const end = getPosition("ap");
+    /* =====================================================
+       DRAW LINE
+    ===================================================== */
 
-    const duration = 2200;
+    function line(from, to) {
 
-    const startTime = performance.now();
+        const a =
+            getPosition(from);
 
-    hopCount = 0;
-    updateStats();
+        const b =
+            getPosition(to);
 
-    await new Promise(resolve => {
 
-        function animate(now) {
-
-            const progress =
-                Math.min(
-                    (now - startTime) / duration,
-                    1
-                );
-
-            const x =
-                start.x +
-                (end.x - start.x) *
-                progress;
-
-            setPacketPosition(
-                x,
-                start.y
+        const element =
+            document.createElementNS(
+                "http://www.w3.org/2000/svg",
+                "line"
             );
 
-            /*
-               Node taps detect packet.
-            */
 
-            const nodes = [
-                "pc1",
-                "switch",
-                "pc2",
-                "server"
-            ];
+        element.setAttribute(
+            "x1",
+            a.x
+        );
 
-            nodes.forEach(id => {
+        element.setAttribute(
+            "y1",
+            a.y
+        );
 
-                const node = getPosition(id);
+        element.setAttribute(
+            "x2",
+            b.x
+        );
 
-                if (
-                    Math.abs(x - node.x) < 7
-                ) {
+        element.setAttribute(
+            "y2",
+            b.y
+        );
 
-                    devices[id].classList.add(
-                        "active"
-                    );
+
+        element.classList.add(
+            "connection"
+        );
+
+
+        element.dataset.from =
+            from;
+
+        element.dataset.to =
+            to;
+
+
+        svg.appendChild(element);
+
+
+        return element;
+
+    }
+
+
+    /* =====================================================
+       CLEAR LINES
+    ===================================================== */
+
+    function clearLines() {
+
+        svg.innerHTML = "";
+
+    }
+
+
+    /* =====================================================
+       DRAW STAR
+    ===================================================== */
+
+    function drawStar() {
+
+        clearLines();
+
+        line("router", "switch");
+
+        line("switch", "pc1");
+
+        line("switch", "pc2");
+
+        line("switch", "server");
+
+        line("switch", "ap");
+
+    }
+
+
+    /* =====================================================
+       DRAW TREE
+    ===================================================== */
+
+    function drawTree() {
+
+        clearLines();
+
+        line("router", "switch");
+
+        line("switch", "pc1");
+
+        line("switch", "pc2");
+
+        line("pc2", "server");
+
+        line("pc2", "ap");
+
+    }
+
+
+    /* =====================================================
+       DRAW BUS
+    ===================================================== */
+
+    function drawBus() {
+
+        clearLines();
+
+        busLine.style.display =
+            "block";
+
+
+        const router =
+            getPosition("router");
+
+        const ap =
+            getPosition("ap");
+
+
+        busLine.style.left =
+            router.x + "px";
+
+        busLine.style.top =
+            router.y + "px";
+
+        busLine.style.width =
+            (ap.x - router.x) + "px";
+
+
+        const backboneY =
+            router.y;
+
+
+        const taps = [
+            "pc1",
+            "switch",
+            "pc2",
+            "server"
+        ];
+
+
+        taps.forEach(id => {
+
+            const p =
+                getPosition(id);
+
+
+            const tap =
+                document.createElementNS(
+                    "http://www.w3.org/2000/svg",
+                    "line"
+                );
+
+
+            tap.setAttribute(
+                "x1",
+                p.x
+            );
+
+            tap.setAttribute(
+                "y1",
+                p.y
+            );
+
+            tap.setAttribute(
+                "x2",
+                p.x
+            );
+
+            tap.setAttribute(
+                "y2",
+                backboneY
+            );
+
+
+            tap.classList.add(
+                "connection"
+            );
+
+
+            tap.dataset.from =
+                id;
+
+            tap.dataset.to =
+                "backbone";
+
+
+            svg.appendChild(tap);
+
+        });
+
+    }
+
+
+    /* =====================================================
+       DRAW RING
+    ===================================================== */
+
+    function drawRing() {
+
+        clearLines();
+
+        line("router", "switch");
+
+        line("switch", "server");
+
+        line("server", "ap");
+
+        line("ap", "pc2");
+
+        line("pc2", "pc1");
+
+        line("pc1", "router");
+
+    }
+
+
+    /* =====================================================
+       DRAW TOPOLOGY
+    ===================================================== */
+
+    function drawTopology() {
+
+        applyPositions();
+
+        busLine.style.display =
+            "none";
+
+
+        requestAnimationFrame(
+            function () {
+
+                if (topology === "star") {
+
+                    drawStar();
 
                 }
 
-            });
+                if (topology === "tree") {
 
-            if (progress < 1) {
+                    drawTree();
 
-                requestAnimationFrame(animate);
+                }
 
-            } else {
+                if (topology === "bus") {
 
-                resolve();
+                    drawBus();
+
+                }
+
+                if (topology === "ring") {
+
+                    drawRing();
+
+                }
 
             }
-        }
-
-        requestAnimationFrame(animate);
-
-    });
-
-    /*
-       Server becomes destination.
-    */
-
-    await sleep(250);
-
-    hopCount = 1;
-    updateStats();
-
-    addLog(
-        "BUS: SERVER mendeteksi packet pada backbone."
-    );
-
-    await pulseDevice(
-        "server",
-        "receive",
-        900
-    );
-
-    busLine.classList.remove(
-        "active",
-        "bus-flow"
-    );
-
-    Object.values(devices).forEach(device => {
-        device.classList.remove("active");
-    });
-
-    addLog(
-        "BUS: Data berhasil diterima SERVER."
-    );
-
-}
-
-
-/* =========================================================
-   RING ANIMATION
-=========================================================
-
-   RING:
-
-                  ROUTER
-               ↗         ↘
-            PC1           SWITCH
-             ↑             ↓
-            PC2           SERVER
-               ↖         ↙
-                  AP
-
-   Ciri khas:
-   - Packet mengikuti jalur melingkar
-   - Tidak ada switch pusat
-   - Jalur ring menyala berurutan
-========================================================= */
-
-async function animateRing() {
-
-    const route = [
-        "router",
-        "switch",
-        "server"
-    ];
-
-    addLog(
-        "RING: Packet masuk ke jalur ring."
-    );
-
-    /*
-       ROUTER -> SWITCH
-    */
-
-    activateConnection(
-        "router",
-        "switch",
-        "ring-active"
-    );
-
-    devices.router.classList.add(
-        "ring-active"
-    );
-
-    await movePacketTo(
-        "switch",
-        800
-    );
-
-    devices.router.classList.remove(
-        "ring-active"
-    );
-
-    devices.switch.classList.add(
-        "ring-active"
-    );
-
-    hopCount = 1;
-    updateStats();
-
-    addLog(
-        "RING: Packet bergerak clockwise ke SWITCH."
-    );
-
-    /*
-       SWITCH -> SERVER
-    */
-
-    activateConnection(
-        "switch",
-        "server",
-        "ring-active"
-    );
-
-    await sleep(150);
-
-    await movePacketTo(
-        "server",
-        900
-    );
-
-    devices.switch.classList.remove(
-        "ring-active"
-    );
-
-    devices.server.classList.add(
-        "ring-active"
-    );
-
-    hopCount = 2;
-    updateStats();
-
-    addLog(
-        "RING: Packet mencapai SERVER."
-    );
-
-    await sleep(200);
-
-    /*
-       Ring keeps rotating briefly
-       to visualize circular topology.
-    */
-
-    const ringOrder = [
-        "server",
-        "ap",
-        "pc2",
-        "pc1",
-        "router"
-    ];
-
-    for (const id of ringOrder) {
-
-        devices[id].classList.add(
-            "ring-active"
-        );
-
-        await sleep(120);
-
-        devices[id].classList.remove(
-            "ring-active"
-        );
-    }
-
-    await pulseDevice(
-        "server",
-        "receive",
-        900
-    );
-
-    addLog(
-        "RING: Data berhasil diterima SERVER."
-    );
-
-}
-
-
-/* =========================================================
-   START TRANSMISSION
-========================================================= */
-
-async function sendData() {
-
-    if (running) return;
-
-    running = true;
-
-    sendBtn.disabled = true;
-
-    packet.style.display = "block";
-
-    clearDeviceStates();
-
-    hopCount = 0;
-
-    packetCount++;
-
-    packetStatusEl.textContent = "TRANSMITTING";
-
-    logStatus.textContent = "TRANSMITTING";
-
-    latencyEl.textContent =
-        Math.floor(
-            15 + Math.random() * 30
-        ) + " ms";
-
-    updateStats();
-
-    /*
-       Packet starts from ROUTER.
-    */
-
-    const start = getPosition("router");
-
-    setPacketPosition(
-        start.x,
-        start.y
-    );
-
-    devices.router.classList.add(
-        "active"
-    );
-
-    await sleep(300);
-
-    devices.router.classList.remove(
-        "active"
-    );
-
-
-    try {
-
-        if (currentTopology === "star") {
-
-            await animateStar();
-
-        }
-
-        else if (currentTopology === "tree") {
-
-            await animateTree();
-
-        }
-
-        else if (currentTopology === "bus") {
-
-            await animateBus();
-
-        }
-
-        else if (currentTopology === "ring") {
-
-            await animateRing();
-
-        }
-
-    }
-
-    catch (error) {
-
-        console.error(error);
-
-        addLog(
-            "ERROR: Animasi mengalami masalah."
         );
 
     }
 
 
-    /*
-       Transmission finished.
-    */
+    /* =====================================================
+       CLEAR DEVICE
+    ===================================================== */
 
-    packet.style.display = "none";
+    function clearDevices() {
 
-    clearDeviceStates();
+        for (const id in device) {
 
-    document
-        .querySelectorAll(".connection")
-        .forEach(line => {
+            device[id]
+                .classList
+                .remove(
+                    "active",
+                    "receive",
+                    "ring-active"
+                );
 
-            line.classList.remove(
-                "active",
-                "ring-active",
-                "bus-active"
+        }
+
+    }
+
+
+    /* =====================================================
+       ACTIVATE LINE
+    ===================================================== */
+
+    function activateLine(
+        from,
+        to,
+        className = "active"
+    ) {
+
+        const lines =
+            svg.querySelectorAll(
+                ".connection"
             );
+
+
+        lines.forEach(item => {
+
+            const a =
+                item.dataset.from;
+
+            const b =
+                item.dataset.to;
+
+
+            if (
+                (a === from && b === to)
+                ||
+                (a === to && b === from)
+            ) {
+
+                item.classList.add(
+                    className
+                );
+
+            }
 
         });
 
-    packetStatusEl.textContent = "DELIVERED";
-
-    logStatus.textContent = "DELIVERED";
-
-    running = false;
-
-    sendBtn.disabled = false;
-
-    updateStats();
-
-}
+    }
 
 
-/* =========================================================
-   RESET
-========================================================= */
+    /* =====================================================
+       MOVE PACKET
+    ===================================================== */
 
-function resetSimulation() {
+    function movePacket(
+        id,
+        duration = 900
+    ) {
 
-    if (running) return;
-
-    packet.style.display = "none";
-
-    clearDeviceStates();
-
-    packetCount = 0;
-    hopCount = 0;
-
-    packetStatusEl.textContent = "IDLE";
-
-    latencyEl.textContent = "0 ms";
-
-    logStatus.textContent = "READY";
-
-    busLine.classList.remove(
-        "active",
-        "bus-flow"
-    );
-
-    drawTopology();
-
-    updateStats();
-
-    addLog(
-        "Simulation berhasil di-reset."
-    );
-}
+        const target =
+            getPosition(id);
 
 
-/* =========================================================
-   STATISTICS
-========================================================= */
+        return movePacketXY(
+            target.x,
+            target.y,
+            duration
+        );
 
-function updateStats() {
-
-    packetCountEl.textContent =
-        packetCount;
-
-    hopCountEl.textContent =
-        hopCount;
-}
+    }
 
 
-/* =========================================================
-   CHANGE TOPOLOGY
-========================================================= */
+    function movePacketXY(
+        targetX,
+        targetY,
+        duration
+    ) {
 
-function changeTopology(topology) {
-
-    if (running) return;
-
-    currentTopology = topology;
-
-    const data =
-        topologyInfo[topology];
-
-    titleEl.textContent =
-        data.title;
-
-    descriptionEl.textContent =
-        data.description;
-
-    currentModeEl.textContent =
-        data.title;
-
-    document
-        .querySelectorAll(".topology-btn")
-        .forEach(button => {
-
-            button.classList.toggle(
-                "active",
-                button.dataset.topology === topology
-            );
-
-        });
-
-    packetStatusEl.textContent = "IDLE";
-
-    latencyEl.textContent = "0 ms";
-
-    clearDeviceStates();
-
-    drawTopology();
-
-    addLog(
-        `Mode berubah ke ${data.title}.`
-    );
-}
+        const startX =
+            parseFloat(
+                packet.style.left
+            ) || 0;
 
 
-/* =========================================================
-   BUTTON EVENTS
-========================================================= */
+        const startY =
+            parseFloat(
+                packet.style.top
+            ) || 0;
 
-document
-    .querySelectorAll(".topology-btn")
-    .forEach(button => {
 
-        button.addEventListener(
-            "click",
-            () => {
+        return new Promise(
+            resolve => {
 
-                changeTopology(
-                    button.dataset.topology
+                const start =
+                    performance.now();
+
+
+                function animation(now) {
+
+                    const progress =
+                        Math.min(
+                            (now - start) /
+                            duration,
+                            1
+                        );
+
+
+                    const ease =
+                        progress < 0.5
+                        ?
+                        2 *
+                        progress *
+                        progress
+                        :
+                        1 -
+                        Math.pow(
+                            -2 *
+                            progress +
+                            2,
+                            2
+                        ) /
+                        2;
+
+
+                    const x =
+                        startX +
+                        (
+                            targetX -
+                            startX
+                        ) *
+                        ease;
+
+
+                    const y =
+                        startY +
+                        (
+                            targetY -
+                            startY
+                        ) *
+                        ease;
+
+
+                    packet.style.left =
+                        x + "px";
+
+                    packet.style.top =
+                        y + "px";
+
+
+                    if (
+                        progress < 1
+                    ) {
+
+                        requestAnimationFrame(
+                            animation
+                        );
+
+                    }
+
+                    else {
+
+                        resolve();
+
+                    }
+
+                }
+
+
+                requestAnimationFrame(
+                    animation
                 );
 
             }
         );
 
-    });
+    }
 
 
-sendBtn.addEventListener(
-    "click",
-    sendData
-);
+    /* =====================================================
+       PULSE DEVICE
+    ===================================================== */
+
+    async function pulse(
+        id,
+        type = "active"
+    ) {
+
+        device[id]
+            .classList
+            .add(type);
 
 
-resetBtn.addEventListener(
-    "click",
-    resetSimulation
-);
+        await sleep(450);
 
 
-/* =========================================================
-   WINDOW RESIZE
-========================================================= */
+        device[id]
+            .classList
+            .remove(type);
 
-window.addEventListener(
-    "resize",
-    () => {
+    }
 
-        if (!running) {
 
-            drawTopology();
+    /* =====================================================
+       STAR ANIMATION
+    ===================================================== */
+
+    async function animateStar() {
+
+        log(
+            "STAR: Router mengirim data ke switch."
+        );
+
+
+        activateLine(
+            "router",
+            "switch"
+        );
+
+
+        await movePacket(
+            "switch",
+            1000
+        );
+
+
+        hops = 1;
+
+        updateStats();
+
+
+        await pulse(
+            "switch"
+        );
+
+
+        log(
+            "STAR: Switch menerima packet."
+        );
+
+
+        /*
+           Broadcast
+        */
+
+        device.pc1
+            .classList
+            .add("active");
+
+        device.pc2
+            .classList
+            .add("active");
+
+        device.ap
+            .classList
+            .add("active");
+
+
+        await sleep(400);
+
+
+        device.pc1
+            .classList
+            .remove("active");
+
+        device.pc2
+            .classList
+            .remove("active");
+
+        device.ap
+            .classList
+            .remove("active");
+
+
+        /*
+           Destination
+        */
+
+        activateLine(
+            "switch",
+            "server"
+        );
+
+
+        await movePacket(
+            "server",
+            1000
+        );
+
+
+        hops = 2;
+
+        updateStats();
+
+
+        await pulse(
+            "server",
+            "receive"
+        );
+
+
+        log(
+            "STAR: Server menerima data."
+        );
+
+    }
+
+
+    /* =====================================================
+       TREE ANIMATION
+    ===================================================== */
+
+    async function animateTree() {
+
+        log(
+            "TREE: Router menjadi root."
+        );
+
+
+        activateLine(
+            "router",
+            "switch"
+        );
+
+
+        await movePacket(
+            "switch",
+            800
+        );
+
+
+        hops = 1;
+
+        updateStats();
+
+
+        await pulse(
+            "switch"
+        );
+
+
+        log(
+            "TREE: Packet turun ke cabang PC2."
+        );
+
+
+        activateLine(
+            "switch",
+            "pc2"
+        );
+
+
+        await movePacket(
+            "pc2",
+            850
+        );
+
+
+        hops = 2;
+
+        updateStats();
+
+
+        await pulse(
+            "pc2"
+        );
+
+
+        log(
+            "TREE: PC2 meneruskan packet."
+        );
+
+
+        activateLine(
+            "pc2",
+            "server"
+        );
+
+
+        await movePacket(
+            "server",
+            900
+        );
+
+
+        hops = 3;
+
+        updateStats();
+
+
+        await pulse(
+            "server",
+            "receive"
+        );
+
+
+        log(
+            "TREE: Server menerima data."
+        );
+
+    }
+
+
+    /* =====================================================
+       BUS ANIMATION
+    ===================================================== */
+
+    async function animateBus() {
+
+        log(
+            "BUS: Packet masuk ke backbone."
+        );
+
+
+        busLine.classList.add(
+            "active"
+        );
+
+
+        const start =
+            getPosition("router");
+
+        const end =
+            getPosition("ap");
+
+
+        packet.style.left =
+            start.x + "px";
+
+        packet.style.top =
+            start.y + "px";
+
+
+        const duration =
+            2500;
+
+
+        const begin =
+            performance.now();
+
+
+        await new Promise(
+            resolve => {
+
+
+                function animate(now) {
+
+                    const progress =
+                        Math.min(
+                            (now - begin) /
+                            duration,
+                            1
+                        );
+
+
+                    const x =
+                        start.x +
+                        (
+                            end.x -
+                            start.x
+                        ) *
+                        progress;
+
+
+                    packet.style.left =
+                        x + "px";
+
+                    packet.style.top =
+                        start.y + "px";
+
+
+                    /*
+                       Device mendengarkan
+                       backbone
+                    */
+
+                    [
+                        "pc1",
+                        "switch",
+                        "pc2",
+                        "server"
+                    ].forEach(
+                        id => {
+
+                            const p =
+                                getPosition(id);
+
+
+                            if (
+                                Math.abs(
+                                    x - p.x
+                                ) < 8
+                            ) {
+
+                                device[id]
+                                    .classList
+                                    .add(
+                                        "active"
+                                    );
+
+                            }
+
+                            else {
+
+                                device[id]
+                                    .classList
+                                    .remove(
+                                        "active"
+                                    );
+
+                            }
+
+                        }
+                    );
+
+
+                    if (
+                        progress < 1
+                    ) {
+
+                        requestAnimationFrame(
+                            animate
+                        );
+
+                    }
+
+                    else {
+
+                        resolve();
+
+                    }
+
+                }
+
+
+                requestAnimationFrame(
+                    animate
+                );
+
+            }
+        );
+
+
+        await sleep(250);
+
+
+        hops = 1;
+
+        updateStats();
+
+
+        await pulse(
+            "server",
+            "receive"
+        );
+
+
+        clearDevices();
+
+
+        busLine.classList.remove(
+            "active"
+        );
+
+
+        log(
+            "BUS: Server menerima data dari backbone."
+        );
+
+    }
+
+
+    /* =====================================================
+       RING ANIMATION
+    ===================================================== */
+
+    async function animateRing() {
+
+        log(
+            "RING: Packet masuk ke jalur ring."
+        );
+
+
+        /*
+           ROUTER
+           ↓
+           SWITCH
+        */
+
+        activateLine(
+            "router",
+            "switch",
+            "ring-active"
+        );
+
+
+        await movePacket(
+            "switch",
+            850
+        );
+
+
+        hops = 1;
+
+        updateStats();
+
+
+        await pulse(
+            "switch",
+            "ring-active"
+        );
+
+
+        /*
+           SWITCH
+           ↓
+           SERVER
+        */
+
+        activateLine(
+            "switch",
+            "server",
+            "ring-active"
+        );
+
+
+        await movePacket(
+            "server",
+            950
+        );
+
+
+        hops = 2;
+
+        updateStats();
+
+
+        await pulse(
+            "server",
+            "receive"
+        );
+
+
+        log(
+            "RING: Server menerima data."
+        );
+
+
+        /*
+           Efek mengelilingi ring
+        */
+
+        const ringNodes = [
+            "ap",
+            "pc2",
+            "pc1",
+            "router"
+        ];
+
+
+        for (
+            const id of ringNodes
+        ) {
+
+            device[id]
+                .classList
+                .add(
+                    "ring-active"
+                );
+
+
+            await sleep(150);
+
+
+            device[id]
+                .classList
+                .remove(
+                    "ring-active"
+                );
 
         }
 
     }
-);
 
 
-/* =========================================================
-   INITIALIZE
-========================================================= */
+    /* =====================================================
+       SEND DATA
+    ===================================================== */
 
-window.addEventListener(
-    "load",
-    () => {
+    async function sendData() {
+
+        if (running) {
+
+            return;
+
+        }
+
+
+        running = true;
+
+        sendBtn.disabled = true;
+
+
+        clearDevices();
+
+
+        packet.style.display =
+            "block";
+
+
+        packets++;
+
+
+        hops = 0;
+
+
+        packetStatusEl.textContent =
+            "TRANSMITTING";
+
+
+        logStatus.textContent =
+            "TRANSMITTING";
+
+
+        latencyEl.textContent =
+            Math.floor(
+                15 +
+                Math.random() * 25
+            )
+            +
+            " ms";
+
+
+        updateStats();
+
+
+        /*
+           Pastikan posisi sudah benar
+        */
+
+        applyPositions();
+
+
+        await sleep(100);
+
+
+        const start =
+            getPosition("router");
+
+
+        packet.style.left =
+            start.x + "px";
+
+        packet.style.top =
+            start.y + "px";
+
+
+        device.router
+            .classList
+            .add("active");
+
+
+        await sleep(300);
+
+
+        device.router
+            .classList
+            .remove("active");
+
+
+        try {
+
+            if (
+                topology === "star"
+            ) {
+
+                await animateStar();
+
+            }
+
+
+            else if (
+                topology === "tree"
+            ) {
+
+                await animateTree();
+
+            }
+
+
+            else if (
+                topology === "bus"
+            ) {
+
+                await animateBus();
+
+            }
+
+
+            else if (
+                topology === "ring"
+            ) {
+
+                await animateRing();
+
+            }
+
+        }
+
+        catch (error) {
+
+            console.error(
+                error
+            );
+
+            log(
+                "ERROR: " +
+                error.message
+            );
+
+        }
+
+
+        await sleep(300);
+
+
+        packet.style.display =
+            "none";
+
+
+        clearDevices();
+
+
+        svg
+            .querySelectorAll(
+                ".connection"
+            )
+            .forEach(
+                element => {
+
+                    element.classList.remove(
+                        "active",
+                        "ring-active"
+                    );
+
+                }
+            );
+
+
+        packetStatusEl.textContent =
+            "DELIVERED";
+
+
+        logStatus.textContent =
+            "DELIVERED";
+
+
+        running = false;
+
+        sendBtn.disabled = false;
+
+    }
+
+
+    /* =====================================================
+       RESET
+    ===================================================== */
+
+    function resetSimulation() {
+
+        if (running) {
+
+            return;
+
+        }
+
+
+        packets = 0;
+
+        hops = 0;
+
+
+        packet.style.display =
+            "none";
+
+
+        clearDevices();
+
+
+        busLine.classList.remove(
+            "active"
+        );
+
+
+        svg
+            .querySelectorAll(
+                ".connection"
+            )
+            .forEach(
+                element => {
+
+                    element.classList.remove(
+                        "active",
+                        "ring-active"
+                    );
+
+                }
+            );
+
+
+        packetStatusEl.textContent =
+            "IDLE";
+
+
+        logStatus.textContent =
+            "READY";
+
+
+        latencyEl.textContent =
+            "0 ms";
+
+
+        updateStats();
+
+
+        drawTopology();
+
+
+        log(
+            "Simulation di-reset."
+        );
+
+    }
+
+
+    /* =====================================================
+       UPDATE STATS
+    ===================================================== */
+
+    function updateStats() {
+
+        packetCountEl.textContent =
+            packets;
+
+        hopCountEl.textContent =
+            hops;
+
+    }
+
+
+    /* =====================================================
+       CHANGE TOPOLOGY
+    ===================================================== */
+
+    function changeTopology(
+        newTopology
+    ) {
+
+        if (running) {
+
+            return;
+
+        }
+
+
+        topology =
+            newTopology;
+
+
+        const info =
+            data[topology];
+
+
+        pageTitle.textContent =
+            info.title;
+
+
+        pageDescription.textContent =
+            info.description;
+
+
+        currentMode.textContent =
+            info.title;
+
+
+        /*
+           Tombol aktif
+        */
+
+        document
+            .querySelectorAll(
+                ".topology-btn"
+            )
+            .forEach(
+                button => {
+
+                    button.classList.toggle(
+                        "active",
+                        button.dataset.topology ===
+                        topology
+                    );
+
+                }
+            );
+
+
+        packetStatusEl.textContent =
+            "IDLE";
+
+
+        latencyEl.textContent =
+            "0 ms";
+
+
+        clearDevices();
+
+
+        drawTopology();
+
+
+        log(
+            "Topology berubah menjadi " +
+            info.title
+        );
+
+    }
+
+
+    /* =====================================================
+       TOPOLOGY BUTTON
+    ===================================================== */
+
+    const topologyButtons =
+        document.querySelectorAll(
+            ".topology-btn"
+        );
+
+
+    topologyButtons.forEach(
+        button => {
+
+            button.addEventListener(
+                "click",
+                function () {
+
+                    const selected =
+                        this.dataset.topology;
+
+
+                    changeTopology(
+                        selected
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+    /* =====================================================
+       SEND BUTTON
+    ===================================================== */
+
+    sendBtn.addEventListener(
+        "click",
+        function () {
+
+            sendData();
+
+        }
+    );
+
+
+    /* =====================================================
+       RESET BUTTON
+    ===================================================== */
+
+    resetBtn.addEventListener(
+        "click",
+        function () {
+
+            resetSimulation();
+
+        }
+    );
+
+
+    /* =====================================================
+       RESIZE
+    ===================================================== */
+
+    window.addEventListener(
+        "resize",
+        function () {
+
+            if (!running) {
+
+                drawTopology();
+
+            }
+
+        }
+    );
+
+
+    /* =====================================================
+       INITIALIZE
+    ===================================================== */
+
+    function initialize() {
+
+        applyPositions();
 
         drawTopology();
 
         updateStats();
 
-        addLog(
-            "Network simulator initialized."
+        log(
+            "Network simulator siap."
+        );
+
+        console.log(
+            "Network Topology Simulator aktif."
         );
 
     }
-);
+
+
+    initialize();
+
+});
