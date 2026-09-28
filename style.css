@@ -1,19 +1,31 @@
 * {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
 }
 
+
 body {
-    font-family: Arial, Helvetica, sans-serif;
-    background: #07111f;
-    color: #eaf2ff;
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    background: #071321;
+    color: #edf5ff;
+
     min-height: 100vh;
 }
+
 
 button {
     font-family: inherit;
 }
+
+
+/* =====================================================
+   APP
+===================================================== */
 
 .app {
     display: flex;
@@ -21,619 +33,873 @@ button {
 }
 
 
-/* =========================
+/* =====================================================
    SIDEBAR
-========================= */
+===================================================== */
 
 .sidebar {
     width: 270px;
-    background: #0b1728;
-    border-right: 1px solid #1d3048;
-    padding: 24px 18px;
+
+    flex-shrink: 0;
+
+    background: #0a1829;
+
+    border-right:
+        1px solid #20364d;
+
+    padding: 28px 18px;
+
     display: flex;
     flex-direction: column;
 }
 
+
 .brand {
     display: flex;
     align-items: center;
+
     gap: 12px;
-    padding: 10px 8px 28px;
+
+    padding:
+        4px 8px 28px;
 }
+
 
 .brand-icon {
     width: 46px;
     height: 46px;
+
     border-radius: 13px;
-    background: #142a45;
+
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 23px;
+
+    background: #14304e;
+
+    font-size: 22px;
 }
+
 
 .brand h2 {
     font-size: 15px;
+
     letter-spacing: 1px;
 }
+
 
 .brand span {
     display: block;
-    color: #70849e;
-    font-size: 11px;
+
     margin-top: 4px;
+
+    color: #7088a2;
+
+    font-size: 10px;
 }
 
-.menu-title {
-    color: #5f7692;
+
+.section-title {
+    margin:
+        12px 8px 10px;
+
+    color: #5e7691;
+
     font-size: 10px;
+
     font-weight: bold;
-    letter-spacing: 1.5px;
-    margin: 15px 8px 10px;
+
+    letter-spacing: 1.8px;
 }
+
+
+.control-title {
+    margin-top: 25px;
+}
+
+
+/* =====================================================
+   TOPOLOGY BUTTON
+===================================================== */
 
 .topology-btn {
     width: 100%;
-    border: 1px solid transparent;
+
+    border:
+        1px solid transparent;
+
     background: transparent;
-    color: #91a5bd;
-    padding: 12px;
+
+    color: #91a6bd;
+
     border-radius: 10px;
+
+    padding: 12px;
+
+    margin-bottom: 6px;
+
     display: flex;
     align-items: center;
+
     gap: 12px;
+
     cursor: pointer;
+
     text-align: left;
-    margin-bottom: 6px;
-    transition: .2s;
+
+    transition:
+        background .2s,
+        border .2s,
+        transform .15s;
 }
+
 
 .topology-btn:hover {
-    background: #102239;
+    background: #11253d;
+
     color: white;
+
+    transform: translateX(2px);
 }
+
 
 .topology-btn.active {
-    background: #142c48;
-    border-color: #24557d;
+    background: #163452;
+
+    border-color: #28618c;
+
     color: white;
 }
 
-.topology-btn > span {
+
+.topology-icon {
     width: 32px;
-    text-align: center;
-    font-size: 19px;
+
+    display: flex;
+    justify-content: center;
+
+    font-size: 18px;
 }
 
-.topology-btn strong {
+
+.topology-btn b {
     display: block;
+
     font-size: 12px;
 }
+
 
 .topology-btn small {
     display: block;
-    color: #647b96;
-    font-size: 10px;
-    margin-top: 3px;
+
+    margin-top: 4px;
+
+    color: #69819b;
+
+    font-size: 9px;
 }
+
+
+/* =====================================================
+   CONTROL BUTTON
+===================================================== */
 
 .control-btn {
-    border: none;
     width: 100%;
-    padding: 13px;
+
+    border: none;
+
     border-radius: 9px;
+
+    padding: 13px;
+
     margin-bottom: 8px;
+
     cursor: pointer;
-    font-weight: bold;
+
     font-size: 11px;
-    letter-spacing: .5px;
-    transition: .2s;
+
+    font-weight: bold;
+
+    transition:
+        transform .15s,
+        filter .2s;
 }
 
-.control-btn.send {
-    background: #176b52;
+
+.control-btn:hover {
+    filter: brightness(1.15);
+
+    transform: translateY(-1px);
+}
+
+
+.control-btn:active {
+    transform: translateY(1px);
+}
+
+
+.send-btn {
+    background: #16815f;
+
     color: white;
 }
 
-.control-btn.send:hover {
-    background: #208866;
+
+.reset-btn {
+    background: #1b3048;
+
+    color: #a7b9cc;
 }
 
-.control-btn.reset {
-    background: #192a3e;
-    color: #9cb1c9;
-}
-
-.control-btn.reset:hover {
-    background: #233952;
-}
 
 .control-btn:disabled {
-    opacity: .45;
+    opacity: .5;
+
     cursor: not-allowed;
 }
 
-.info-box {
+
+/* =====================================================
+   CURRENT MODE
+===================================================== */
+
+.current-box {
     margin-top: auto;
-    background: #0e2035;
-    border: 1px solid #1b344f;
-    border-radius: 10px;
+
     padding: 14px;
+
+    border-radius: 10px;
+
+    background: #0d2137;
+
+    border:
+        1px solid #1d3852;
 }
 
-.info-title {
-    color: #607994;
-    font-size: 9px;
-    letter-spacing: 1.3px;
+
+.current-box span {
+    display: block;
+
     margin-bottom: 7px;
+
+    color: #5d7691;
+
+    font-size: 9px;
+
+    letter-spacing: 1.5px;
 }
 
-#currentMode {
+
+.current-box strong {
+    color: #69bdf0;
+
     font-size: 11px;
-    color: #76c9ff;
-    font-weight: bold;
 }
 
 
-/* =========================
+/* =====================================================
    MAIN
-========================= */
+===================================================== */
 
 .main {
     flex: 1;
-    padding: 28px;
+
     min-width: 0;
+
+    padding: 28px;
 }
 
-.header {
+
+/* =====================================================
+   HEADER
+===================================================== */
+
+.top-header {
     display: flex;
+
     justify-content: space-between;
+
     align-items: flex-start;
-    margin-bottom: 22px;
+
+    margin-bottom: 20px;
 }
+
 
 .eyebrow {
-    color: #4e9ed0;
+    color: #49a9dc;
+
     font-size: 10px;
-    letter-spacing: 2px;
+
     font-weight: bold;
+
+    letter-spacing: 2px;
+
     margin-bottom: 7px;
 }
 
-.header h1 {
+
+.top-header h1 {
     font-size: 25px;
-    margin-bottom: 6px;
+
+    margin-bottom: 7px;
 }
 
-.header p {
-    color: #7187a0;
+
+.top-header p {
+    color: #7289a2;
+
     font-size: 12px;
 }
 
-.status {
+
+.online-status {
     display: flex;
+
     align-items: center;
+
     gap: 8px;
-    color: #73b9a0;
+
+    color: #58d2a1;
+
     font-size: 10px;
+
     font-weight: bold;
+
     letter-spacing: 1px;
 }
 
-.status-dot {
+
+.online-status span {
     width: 8px;
     height: 8px;
+
     border-radius: 50%;
-    background: #42d69a;
-    box-shadow: 0 0 12px #42d69a;
+
+    background: #45d49d;
+
+    box-shadow:
+        0 0 12px #45d49d;
 }
 
 
-/* =========================
+/* =====================================================
    STATS
-========================= */
+===================================================== */
 
 .stats {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
     gap: 12px;
+
     margin-bottom: 15px;
 }
 
+
 .stat-card {
-    background: #0c1b2d;
-    border: 1px solid #1a3048;
-    border-radius: 10px;
     padding: 15px;
+
+    border-radius: 10px;
+
+    background: #0b1b2d;
+
+    border:
+        1px solid #1c344c;
 }
+
 
 .stat-card span {
     display: block;
-    color: #607792;
+
+    color: #5f7893;
+
     font-size: 9px;
+
     letter-spacing: 1px;
+
     margin-bottom: 8px;
 }
+
 
 .stat-card strong {
     font-size: 19px;
 }
 
 
-/* =========================
-   NETWORK PANEL
-========================= */
+/* =====================================================
+   PANELS
+===================================================== */
 
 .network-panel,
 .log-panel {
-    background: #0a1829;
-    border: 1px solid #1a3048;
+    background: #0a192a;
+
+    border:
+        1px solid #1b334b;
+
     border-radius: 12px;
+
     overflow: hidden;
 }
+
 
 .network-panel {
     margin-bottom: 15px;
 }
 
+
 .panel-header,
 .log-header {
     height: 62px;
-    border-bottom: 1px solid #192d44;
-    padding: 0 18px;
+
+    padding:
+        0 18px;
+
     display: flex;
+
     align-items: center;
+
     justify-content: space-between;
+
+    border-bottom:
+        1px solid #1b3047;
 }
+
 
 .panel-header h2,
 .log-header h2 {
     font-size: 12px;
+
     letter-spacing: 1px;
 }
 
+
 .panel-header span,
 .log-header span {
-    color: #607792;
-    font-size: 10px;
+    display: block;
+
     margin-top: 4px;
+
+    color: #607995;
+
+    font-size: 10px;
 }
+
+
+/* =====================================================
+   LEGEND
+===================================================== */
 
 .legend {
     display: flex;
+
     gap: 18px;
 }
 
-.legend span {
+
+.legend div {
     display: flex;
+
     align-items: center;
+
     gap: 6px;
-    color: #7186a0;
+
+    color: #7187a0;
+
+    font-size: 10px;
 }
 
+
 .legend i {
-    display: inline-block;
     width: 7px;
     height: 7px;
+
+    display: inline-block;
+
     border-radius: 50%;
 }
 
-.legend-device {
-    background: #4e9ed0;
-}
 
-.legend-packet {
-    background: #4de0a9;
-    box-shadow: 0 0 8px #4de0a9;
+.device-dot {
+    background: #51a9d9;
 }
 
 
-/* =========================
-   CANVAS
-========================= */
+.packet-dot {
+    background: #49dda5;
+
+    box-shadow:
+        0 0 10px #49dda5;
+}
+
+
+/* =====================================================
+   NETWORK CANVAS
+===================================================== */
 
 .network-canvas {
-    height: 550px;
     position: relative;
+
+    width: 100%;
+
+    height: 550px;
+
     overflow: hidden;
-    background:
-        linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+
+    background-color: #091a2b;
+
+    background-image:
+        linear-gradient(
+            rgba(255,255,255,.025) 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            90deg,
+            rgba(255,255,255,.025) 1px,
+            transparent 1px
+        );
+
     background-size: 30px 30px;
 }
 
-.network-canvas::before {
+
+.network-canvas::after {
     content: "";
+
     position: absolute;
+
     inset: 0;
-    background: radial-gradient(
-        circle at center,
-        rgba(43, 104, 153, .08),
-        transparent 55%
-    );
+
+    pointer-events: none;
+
+    background:
+        radial-gradient(
+            circle at center,
+            rgba(42,108,157,.08),
+            transparent 60%
+        );
+}
+
+
+/* =====================================================
+   SVG
+===================================================== */
+
+.network-svg {
+    position: absolute;
+
+    left: 0;
+    top: 0;
+
+    width: 100%;
+    height: 100%;
+
+    z-index: 1;
+
     pointer-events: none;
 }
 
-#connectionSvg {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 1;
-}
 
 .connection {
     fill: none;
-    stroke: #263f59;
+
+    stroke: #2a435d;
+
     stroke-width: 2;
-    transition: .3s;
+
+    transition:
+        stroke .2s,
+        filter .2s;
 }
+
 
 .connection.active {
-    stroke: #39a7dd;
-    stroke-width: 3;
-    filter: drop-shadow(0 0 5px rgba(57,167,221,.7));
+    stroke: #43b8ed;
+
+    stroke-width: 4;
+
+    filter:
+        drop-shadow(
+            0 0 7px
+            rgba(67,184,237,.8)
+        );
 }
 
-.connection.bus-active {
-    stroke: #d7a64a;
-    stroke-width: 4;
-    filter: drop-shadow(0 0 7px rgba(215,166,74,.7));
-}
 
 .connection.ring-active {
-    stroke: #b66cff;
+    stroke: #b56bff;
+
     stroke-width: 4;
-    filter: drop-shadow(0 0 8px rgba(182,108,255,.8));
+
+    filter:
+        drop-shadow(
+            0 0 8px
+            rgba(181,107,255,.8)
+        );
 }
 
 
-/* =========================
+/* =====================================================
+   BUS
+===================================================== */
+
+.bus-line {
+    display: none;
+
+    position: absolute;
+
+    height: 5px;
+
+    border-radius: 10px;
+
+    background: #334b63;
+
+    z-index: 2;
+
+    transform: translateY(-50%);
+}
+
+
+.bus-line.active {
+    background: #d49d3d;
+
+    box-shadow:
+        0 0 8px #d49d3d,
+        0 0 22px rgba(212,157,61,.5);
+}
+
+
+/* =====================================================
    DEVICE
-========================= */
+===================================================== */
 
 .device {
     position: absolute;
+
     width: 120px;
-    min-height: 90px;
-    transform: translate(-50%, -50%);
-    background: #0f2339;
-    border: 1px solid #2a4864;
-    border-radius: 12px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+
+    min-height: 88px;
+
+    transform:
+        translate(-50%, -50%);
+
     z-index: 5;
+
+    border-radius: 12px;
+
+    border:
+        1px solid #2b4965;
+
+    background: #10263c;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
     transition:
-        left .35s ease,
-        top .35s ease,
+        left .3s,
+        top .3s,
         transform .2s,
         box-shadow .2s,
         border-color .2s;
 }
 
+
 .device-icon {
     font-size: 23px;
+
     margin-bottom: 5px;
 }
 
+
 .device strong {
     font-size: 10px;
+
     letter-spacing: .7px;
 }
 
+
 .device small {
-    color: #637c96;
-    font-size: 9px;
     margin-top: 4px;
+
+    color: #668099;
+
+    font-size: 9px;
 }
+
 
 .device.active {
-    border-color: #48c6ff;
+    border-color: #4dc7ff;
+
+    transform:
+        translate(-50%, -50%)
+        scale(1.08);
+
     box-shadow:
-        0 0 0 3px rgba(72,198,255,.08),
-        0 0 25px rgba(72,198,255,.25);
-    transform: translate(-50%, -50%) scale(1.07);
+        0 0 0 3px
+        rgba(77,199,255,.1),
+
+        0 0 25px
+        rgba(77,199,255,.35);
 }
+
 
 .device.receive {
-    border-color: #55e5a9;
+    border-color: #51e0a6;
+
     box-shadow:
-        0 0 0 3px rgba(85,229,169,.1),
-        0 0 30px rgba(85,229,169,.35);
+        0 0 0 3px
+        rgba(81,224,166,.1),
+
+        0 0 30px
+        rgba(81,224,166,.4);
 }
+
 
 .device.ring-active {
-    border-color: #b66cff;
+    border-color: #b86cff;
+
     box-shadow:
-        0 0 0 3px rgba(182,108,255,.08),
-        0 0 28px rgba(182,108,255,.35);
+        0 0 0 3px
+        rgba(184,108,255,.1),
+
+        0 0 28px
+        rgba(184,108,255,.4);
 }
 
 
-/* =========================
+/* =====================================================
    PACKET
-========================= */
+===================================================== */
 
 .packet {
     position: absolute;
+
     width: 18px;
     height: 18px;
+
     border-radius: 50%;
+
+    z-index: 20;
+
+    display: none;
+
+    transform:
+        translate(-50%, -50%);
+
     background: #4de0a9;
+
     box-shadow:
         0 0 8px #4de0a9,
         0 0 20px #4de0a9,
         0 0 40px rgba(77,224,169,.6);
-    transform: translate(-50%, -50%);
-    z-index: 20;
-    display: none;
+
+    pointer-events: none;
 }
 
-.packet-core {
+
+.packet div {
     position: absolute;
+
     width: 5px;
     height: 5px;
-    background: white;
+
     border-radius: 50%;
+
+    background: white;
+
     left: 50%;
     top: 50%;
-    transform: translate(-50%, -50%);
+
+    transform:
+        translate(-50%, -50%);
 }
 
 
-/* packet trails */
-
-.packet-trail {
-    position: absolute;
-    width: 8px;
-    height: 8px;
-    background: #4de0a9;
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 10;
-    opacity: .6;
-    pointer-events: none;
-    box-shadow: 0 0 10px #4de0a9;
-}
-
-
-/* =========================
-   BUS
-========================= */
-
-.bus-line {
-    display: none;
-    position: absolute;
-    height: 6px;
-    background: #31465d;
-    border-radius: 10px;
-    z-index: 2;
-    box-shadow: 0 0 5px rgba(255,255,255,.05);
-}
-
-.bus-line.active {
-    background: #c28f38;
-    box-shadow:
-        0 0 8px #c28f38,
-        0 0 18px rgba(194,143,56,.5);
-}
-
-
-/* =========================
+/* =====================================================
    LOG
-========================= */
+===================================================== */
 
 .log-panel {
     height: 180px;
 }
 
+
 .log-header {
     height: 52px;
 }
 
+
 #logStatus {
-    color: #5dca9d;
-    font-weight: bold;
+    color: #5dcea0;
+
+    font-size: 10px;
 }
+
 
 .activity-log {
     height: 128px;
-    padding: 10px 18px;
+
+    padding:
+        8px 18px;
+
     overflow-y: auto;
 }
 
+
 .log-item {
     display: flex;
+
     gap: 15px;
+
     padding: 7px 0;
-    border-bottom: 1px solid rgba(255,255,255,.03);
+
+    border-bottom:
+        1px solid rgba(255,255,255,.035);
+
+    color: #8ca1b8;
+
     font-size: 10px;
-    color: #8ca0b8;
 }
 
-.log-time {
-    color: #4d8eb8;
+
+.log-item span {
     min-width: 65px;
+
+    color: #4f91bb;
 }
 
 
-/* =========================
-   ANIMATIONS
-========================= */
-
-@keyframes pulse {
-    0%, 100% {
-        opacity: 1;
-    }
-
-    50% {
-        opacity: .45;
-    }
-}
-
-@keyframes busFlow {
-    0% {
-        box-shadow: 0 0 5px #c28f38;
-    }
-
-    50% {
-        box-shadow:
-            0 0 15px #e6b758,
-            0 0 30px rgba(230,183,88,.5);
-    }
-
-    100% {
-        box-shadow: 0 0 5px #c28f38;
-    }
-}
-
-@keyframes ringGlow {
-    0% {
-        filter: drop-shadow(0 0 2px #b66cff);
-    }
-
-    50% {
-        filter: drop-shadow(0 0 12px #b66cff);
-    }
-
-    100% {
-        filter: drop-shadow(0 0 2px #b66cff);
-    }
-}
-
-.bus-flow {
-    animation: busFlow .8s infinite;
-}
-
-.ring-flow {
-    animation: ringGlow .8s infinite;
+.log-item p {
+    color: #8ca1b8;
 }
 
 
-/* =========================
+/* =====================================================
    RESPONSIVE
-========================= */
+===================================================== */
 
 @media(max-width: 900px) {
 
     .sidebar {
-        width: 210px;
+        width: 220px;
     }
 
     .main {
         padding: 18px;
     }
 
-    .stats {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
 }
 
-@media(max-width: 650px) {
+
+@media(max-width: 700px) {
 
     .app {
         flex-direction: column;
@@ -643,12 +909,14 @@ button {
         width: 100%;
     }
 
-    .network-canvas {
-        height: 500px;
+    .stats {
+        grid-template-columns:
+            repeat(2, 1fr);
     }
 
-    .header {
+    .top-header {
         flex-direction: column;
+
         gap: 15px;
     }
 
