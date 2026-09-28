@@ -6,100 +6,160 @@
 
     <title>Network Topology Simulator</title>
 
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="./style.css">
 </head>
 
 <body>
 
 <div class="app">
 
-    <!-- SIDEBAR -->
+    <!-- ================= SIDEBAR ================= -->
+
     <aside class="sidebar">
 
         <div class="brand">
             <div class="brand-icon">🌐</div>
+
             <div>
                 <h2>NET SIMULATOR</h2>
                 <span>Interactive Topology</span>
             </div>
         </div>
 
-        <div class="menu-title">TOPOLOGY</div>
 
-        <button class="topology-btn active" data-topology="star">
-            <span>⭐</span>
+        <div class="section-title">
+            TOPOLOGY
+        </div>
+
+
+        <button
+            type="button"
+            class="topology-btn active"
+            data-topology="star"
+        >
+            <span class="topology-icon">⭐</span>
+
             <div>
-                <strong>STAR</strong>
+                <b>STAR</b>
                 <small>Central switch</small>
             </div>
         </button>
 
-        <button class="topology-btn" data-topology="tree">
-            <span>🌳</span>
+
+        <button
+            type="button"
+            class="topology-btn"
+            data-topology="tree"
+        >
+            <span class="topology-icon">🌳</span>
+
             <div>
-                <strong>TREE</strong>
+                <b>TREE</b>
                 <small>Hierarchical network</small>
             </div>
         </button>
 
-        <button class="topology-btn" data-topology="bus">
-            <span>━</span>
+
+        <button
+            type="button"
+            class="topology-btn"
+            data-topology="bus"
+        >
+            <span class="topology-icon">━</span>
+
             <div>
-                <strong>BUS</strong>
+                <b>BUS</b>
                 <small>Shared backbone</small>
             </div>
         </button>
 
-        <button class="topology-btn" data-topology="ring">
-            <span>⭕</span>
+
+        <button
+            type="button"
+            class="topology-btn"
+            data-topology="ring"
+        >
+            <span class="topology-icon">⭕</span>
+
             <div>
-                <strong>RING</strong>
+                <b>RING</b>
                 <small>Circular network</small>
             </div>
         </button>
 
-        <div class="menu-title">CONTROL</div>
 
-        <button id="sendBtn" class="control-btn send">
-            <span>➤</span>
-            SEND DATA
+        <div class="section-title control-title">
+            CONTROL
+        </div>
+
+
+        <button
+            type="button"
+            id="sendBtn"
+            class="control-btn send-btn"
+        >
+            ➤ &nbsp; SEND DATA
         </button>
 
-        <button id="resetBtn" class="control-btn reset">
-            <span>↻</span>
-            RESET
+
+        <button
+            type="button"
+            id="resetBtn"
+            class="control-btn reset-btn"
+        >
+            ↻ &nbsp; RESET
         </button>
 
-        <div class="info-box">
-            <div class="info-title">CURRENT MODE</div>
-            <div id="currentMode">STAR TOPOLOGY</div>
+
+        <div class="current-box">
+
+            <span>CURRENT MODE</span>
+
+            <strong id="currentMode">
+                STAR TOPOLOGY
+            </strong>
+
         </div>
 
     </aside>
 
 
-    <!-- MAIN -->
+    <!-- ================= MAIN ================= -->
+
     <main class="main">
 
-        <header class="header">
+        <header class="top-header">
 
             <div>
-                <div class="eyebrow">NETWORK SIMULATION</div>
-                <h1 id="title">STAR TOPOLOGY</h1>
-                <p id="description">
+
+                <div class="eyebrow">
+                    NETWORK SIMULATION
+                </div>
+
+                <h1 id="pageTitle">
+                    STAR TOPOLOGY
+                </h1>
+
+                <p id="pageDescription">
                     Semua perangkat terhubung melalui satu switch pusat.
                 </p>
+
             </div>
 
-            <div class="status">
-                <span class="status-dot"></span>
+
+            <div class="online-status">
+
+                <span></span>
+
                 NETWORK ONLINE
+
             </div>
 
         </header>
 
 
-        <!-- STATISTICS -->
+        <!-- ================= STAT ================= -->
+
         <section class="stats">
 
             <div class="stat-card">
@@ -125,99 +185,218 @@
         </section>
 
 
-        <!-- NETWORK -->
+        <!-- ================= NETWORK MAP ================= -->
+
         <section class="network-panel">
 
             <div class="panel-header">
+
                 <div>
+
                     <h2>NETWORK MAP</h2>
-                    <span>Real-time packet visualization</span>
+
+                    <span>
+                        Real-time packet visualization
+                    </span>
+
                 </div>
+
 
                 <div class="legend">
-                    <span>
-                        <i class="legend-device"></i>
-                        Device
-                    </span>
 
-                    <span>
-                        <i class="legend-packet"></i>
+                    <div>
+                        <i class="device-dot"></i>
+                        Device
+                    </div>
+
+                    <div>
+                        <i class="packet-dot"></i>
                         Packet
-                    </span>
+                    </div>
+
                 </div>
+
             </div>
 
-            <div id="networkCanvas" class="network-canvas">
 
-                <svg id="connectionSvg"></svg>
+            <div
+                id="networkCanvas"
+                class="network-canvas"
+            >
 
-                <div id="packet" class="packet">
-                    <div class="packet-core"></div>
+                <!-- SVG CONNECTION -->
+                <svg
+                    id="networkSvg"
+                    class="network-svg"
+                ></svg>
+
+
+                <!-- BUS BACKBONE -->
+                <div
+                    id="busLine"
+                    class="bus-line"
+                ></div>
+
+
+                <!-- PACKET -->
+                <div
+                    id="packet"
+                    class="packet"
+                >
+                    <div></div>
                 </div>
 
-                <!-- DEVICES -->
 
-                <div id="router" class="device router">
-                    <div class="device-icon">📡</div>
+                <!-- ROUTER -->
+
+                <div
+                    id="router"
+                    class="device router"
+                >
+
+                    <div class="device-icon">
+                        📡
+                    </div>
+
                     <strong>ROUTER</strong>
+
                     <small>Gateway</small>
+
                 </div>
 
-                <div id="switch" class="device switch">
-                    <div class="device-icon">🔀</div>
+
+                <!-- SWITCH -->
+
+                <div
+                    id="switch"
+                    class="device switch"
+                >
+
+                    <div class="device-icon">
+                        🔀
+                    </div>
+
                     <strong>SWITCH</strong>
+
                     <small>Central</small>
+
                 </div>
 
-                <div id="pc1" class="device pc">
-                    <div class="device-icon">💻</div>
+
+                <!-- PC 1 -->
+
+                <div
+                    id="pc1"
+                    class="device pc1"
+                >
+
+                    <div class="device-icon">
+                        💻
+                    </div>
+
                     <strong>PC 1</strong>
+
                     <small>Client</small>
+
                 </div>
 
-                <div id="pc2" class="device pc">
-                    <div class="device-icon">💻</div>
+
+                <!-- PC 2 -->
+
+                <div
+                    id="pc2"
+                    class="device pc2"
+                >
+
+                    <div class="device-icon">
+                        💻
+                    </div>
+
                     <strong>PC 2</strong>
+
                     <small>Client</small>
+
                 </div>
 
-                <div id="server" class="device server">
-                    <div class="device-icon">🖥️</div>
+
+                <!-- SERVER -->
+
+                <div
+                    id="server"
+                    class="device server"
+                >
+
+                    <div class="device-icon">
+                        🖥️
+                    </div>
+
                     <strong>SERVER</strong>
+
                     <small>Destination</small>
+
                 </div>
 
-                <div id="ap" class="device ap">
-                    <div class="device-icon">📶</div>
+
+                <!-- ACCESS POINT -->
+
+                <div
+                    id="ap"
+                    class="device ap"
+                >
+
+                    <div class="device-icon">
+                        📶
+                    </div>
+
                     <strong>ACCESS POINT</strong>
-                    <small>Wireless</small>
-                </div>
 
-                <!-- BUS LINE -->
-                <div id="busLine" class="bus-line"></div>
+                    <small>Wireless</small>
+
+                </div>
 
             </div>
 
         </section>
 
 
-        <!-- LOG -->
+        <!-- ================= LOG ================= -->
+
         <section class="log-panel">
 
             <div class="log-header">
+
                 <div>
+
                     <h2>ACTIVITY LOG</h2>
-                    <span>Packet transmission activity</span>
+
+                    <span>
+                        Packet transmission activity
+                    </span>
+
                 </div>
 
-                <span id="logStatus">READY</span>
+                <strong id="logStatus">
+                    READY
+                </strong>
+
             </div>
 
-            <div id="activityLog" class="activity-log">
+
+            <div
+                id="activityLog"
+                class="activity-log"
+            >
+
                 <div class="log-item">
-                    <span class="log-time">--:--:--</span>
-                    <span>System ready. Select topology and send data.</span>
+
+                    <span>--:--:--</span>
+
+                    <p>
+                        Network simulator siap digunakan.
+                    </p>
+
                 </div>
+
             </div>
 
         </section>
@@ -226,7 +405,9 @@
 
 </div>
 
-<script src="script.js"></script>
+
+<!-- PENTING UNTUK GITHUB PAGES -->
+<script src="./script.js"></script>
 
 </body>
 </html>
