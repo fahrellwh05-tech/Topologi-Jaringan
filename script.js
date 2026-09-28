@@ -1,0 +1,1466 @@
+* {
+    margin: 0;
+    padding: 0;
+    box- sizing: border - box;
+}
+
+:root {
+    --bg: #07111f;
+    --bg2: #0a1627;
+    --panel: #0d1c30;
+    --panel2: #10243c;
+
+    --border: rgba(255, 255, 255, 0.08);
+
+    --text: #e9f2ff;
+    --muted: #8193aa;
+
+    --blue: #36a9ff;
+    --cyan: #36e0ff;
+    --green: #35df8b;
+    --red: #ff536b;
+    --yellow: #ffc857;
+
+    --shadow:
+    0 20px 50px rgba(0, 0, 0, 0.35);
+}
+
+body {
+    min - height: 100vh;
+
+    font - family:
+    Inter,
+        Segoe UI,
+            Arial,
+            sans - serif;
+
+    color: var(--text);
+
+    background:
+    radial - gradient(
+        circle at 70 % 10 %,
+        rgba(40, 120, 255, 0.10),
+        transparent 30 %
+        ),
+        radial - gradient(
+            circle at 20 % 80 %,
+            rgba(0, 220, 255, 0.05),
+            transparent 30 %
+        ),
+        var(--bg);
+
+    overflow - x: hidden;
+}
+
+
+/* ================= HEADER ================= */
+
+.topbar {
+    height: 76px;
+
+    padding: 0 28px;
+
+    display: flex;
+    align - items: center;
+    justify - content: space - between;
+
+    border - bottom: 1px solid var(--border);
+
+    background:
+    rgba(5, 15, 28, 0.85);
+
+    backdrop - filter: blur(15px);
+}
+
+
+.brand {
+    display: flex;
+    align - items: center;
+    gap: 13px;
+}
+
+
+.brand - icon {
+    width: 42px;
+    height: 42px;
+
+    display: flex;
+    align - items: center;
+    justify - content: center;
+
+    border - radius: 12px;
+
+    color: white;
+
+    font - size: 26px;
+
+    background:
+    linear - gradient(
+        135deg,
+            #1475ff,
+            #1edcff
+    );
+
+    box - shadow:
+    0 8px 25px rgba(0, 150, 255, 0.25);
+}
+
+
+.brand h1 {
+    font - size: 15px;
+    letter - spacing: 2px;
+}
+
+
+.brand span {
+    display: block;
+
+    margin - top: 4px;
+
+    color: var(--muted);
+
+    font - size: 10px;
+
+    letter - spacing: 1.5px;
+}
+
+
+.header - status {
+    display: flex;
+    align - items: center;
+    gap: 8px;
+
+    font - size: 11px;
+    font - weight: 700;
+
+    color: var(--green);
+}
+
+
+.status - dot {
+    width: 8px;
+    height: 8px;
+
+    display: inline - block;
+
+    border - radius: 50 %;
+
+    background: var(--green);
+
+    box - shadow:
+    0 0 12px rgba(53, 223, 139, 0.8);
+
+    animation: pulse 1.7s infinite;
+}
+
+
+@keyframes pulse {
+
+    0 %, 100 % {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50 % {
+        opacity: 0.45;
+        transform: scale(0.7);
+    }
+}
+
+
+/* ================= APP ================= */
+
+.app {
+    min - height: calc(100vh - 76px);
+
+    display: flex;
+}
+
+
+/* ================= SIDEBAR ================= */
+
+.sidebar {
+    width: 260px;
+
+    flex - shrink: 0;
+
+    padding: 24px 18px;
+
+    border - right: 1px solid var(--border);
+
+    background:
+    rgba(7, 17, 31, 0.72);
+}
+
+
+.side - title {
+    margin - bottom: 25px;
+}
+
+
+.side - title span {
+    display: block;
+
+    font - size: 12px;
+    font - weight: 800;
+
+    letter - spacing: 1.5px;
+}
+
+
+.side - title small {
+    display: block;
+
+    margin - top: 5px;
+
+    color: var(--muted);
+
+    font - size: 9px;
+    letter - spacing: 1px;
+}
+
+
+.panel - section {
+    margin - bottom: 26px;
+}
+
+
+.panel - section > label {
+    display: block;
+
+    margin - bottom: 10px;
+
+    color: #66809e;
+
+    font - size: 9px;
+    font - weight: 800;
+
+    letter - spacing: 1.5px;
+}
+
+
+select {
+    width: 100 %;
+
+    padding: 12px;
+
+    color: var(--text);
+
+    border: 1px solid var(--border);
+    border - radius: 9px;
+
+    outline: none;
+
+    background: var(--panel);
+
+    cursor: pointer;
+}
+
+
+select:focus {
+    border - color: var(--blue);
+}
+
+
+/* ================= DEVICE LIST ================= */
+
+.device - list {
+    display: flex;
+    flex - direction: column;
+
+    gap: 7px;
+}
+
+
+.device - button {
+    width: 100 %;
+
+    display: flex;
+    align - items: center;
+
+    gap: 10px;
+
+    padding: 9px;
+
+    color: var(--text);
+
+    text - align: left;
+
+    border: 1px solid transparent;
+
+    border - radius: 9px;
+
+    background: transparent;
+
+    cursor: pointer;
+
+    transition:
+    0.2s ease;
+}
+
+
+.device - button:hover {
+    background: rgba(255, 255, 255, 0.04);
+
+    border - color: var(--border);
+
+    transform: translateX(3px);
+}
+
+
+.device - symbol {
+    width: 33px;
+    height: 33px;
+
+    flex - shrink: 0;
+
+    display: flex;
+    align - items: center;
+    justify - content: center;
+
+    border - radius: 9px;
+
+    font - size: 9px;
+    font - weight: 800;
+
+    background: var(--panel2);
+
+    border: 1px solid var(--border);
+}
+
+
+.router - symbol {
+    color: #55c7ff;
+}
+
+.switch-symbol {
+    color: #c28cff;
+}
+
+.pc - symbol {
+    color: #53dfaa;
+}
+
+.server - symbol {
+    color: #ffc95c;
+}
+
+.ap - symbol {
+    color: #ff7890;
+}
+
+
+.device - button strong {
+    display: block;
+
+    font - size: 11px;
+}
+
+
+.device - button small {
+    display: block;
+
+    margin - top: 3px;
+
+    color: var(--muted);
+
+    font - size: 9px;
+}
+
+
+/* ================= ACTION ================= */
+
+.action - button {
+    width: 100 %;
+
+    display: flex;
+    align - items: center;
+    justify - content: center;
+
+    gap: 8px;
+
+    margin - bottom: 8px;
+
+    padding: 11px;
+
+    color: #b8c8db;
+
+    border: 1px solid var(--border);
+
+    border - radius: 9px;
+
+    background: var(--panel);
+
+    cursor: pointer;
+
+    font - size: 10px;
+    font - weight: 800;
+
+    letter - spacing: 0.7px;
+
+    transition: 0.2s;
+}
+
+
+.action - button:hover {
+    border - color: rgba(255, 255, 255, 0.2);
+
+    background: var(--panel2);
+}
+
+
+.action - button.primary {
+    color: white;
+
+    border: none;
+
+    background:
+    linear - gradient(
+        135deg,
+            #1478ff,
+            #18c9ee
+    );
+
+    box - shadow:
+    0 8px 25px rgba(20, 130, 255, 0.18);
+}
+
+
+.action - button.primary:hover {
+    transform: translateY(-1px);
+}
+
+
+/* ================= NETWORK INFO ================= */
+
+.network - info {
+    display: grid;
+
+    grid - template - columns:
+    repeat(3, 1fr);
+
+    gap: 5px;
+
+    margin - top: 30px;
+
+    padding - top: 20px;
+
+    border - top: 1px solid var(--border);
+}
+
+
+.network - info div {
+    text - align: center;
+}
+
+
+.network - info span {
+    display: block;
+
+    margin - bottom: 5px;
+
+    color: #5f7690;
+
+    font - size: 7px;
+}
+
+
+.network - info strong {
+    font - size: 12px;
+}
+
+
+.online - text {
+    color: var(--green);
+    font - size: 8px!important;
+}
+
+
+/* ================= WORKSPACE ================= */
+
+.workspace {
+    flex: 1;
+
+    min - width: 0;
+
+    padding: 30px;
+}
+
+
+.workspace - header {
+    display: flex;
+    align - items: flex - start;
+    justify - content: space - between;
+
+    margin - bottom: 22px;
+}
+
+
+.eyebrow {
+    color: var(--blue);
+
+    font - size: 9px;
+    font - weight: 800;
+
+    letter - spacing: 2px;
+}
+
+
+.workspace - header h2 {
+    margin - top: 5px;
+
+    font - size: 26px;
+
+    letter - spacing: -0.5px;
+}
+
+
+.workspace - header p {
+    max - width: 610px;
+
+    margin - top: 7px;
+
+    color: var(--muted);
+
+    font - size: 11px;
+
+    line - height: 1.6;
+}
+
+
+.connection - status {
+    display: flex;
+    align - items: center;
+
+    gap: 10px;
+
+    padding: 9px 13px;
+
+    border: 1px solid var(--border);
+
+    border - radius: 10px;
+
+    background: rgba(255, 255, 255, 0.025);
+}
+
+
+.connection - status small {
+    display: block;
+
+    color: #617891;
+
+    font - size: 7px;
+}
+
+
+.connection - status strong {
+    display: block;
+
+    margin - top: 3px;
+
+    color: var(--green);
+
+    font - size: 9px;
+}
+
+
+/* ================= CANVAS ================= */
+
+.network - canvas {
+    position: relative;
+
+    width: 100 %;
+
+    min - height: 590px;
+
+    overflow: hidden;
+
+    border: 1px solid var(--border);
+
+    border - radius: 17px;
+
+    background - color: #081522;
+
+    background - image:
+    linear - gradient(
+        rgba(255, 255, 255, 0.025) 1px,
+        transparent 1px
+    ),
+        linear - gradient(
+            90deg,
+            rgba(255, 255, 255, 0.025) 1px,
+            transparent 1px
+        );
+
+    background - size: 32px 32px;
+
+    box - shadow:
+        inset 0 0 80px rgba(0, 0, 0, 0.35),
+        var(--shadow);
+}
+
+
+.network - canvas::after {
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    pointer - events: none;
+
+    background:
+    radial - gradient(
+        circle at center,
+        transparent 25 %,
+        rgba(0, 0, 0, 0.25)
+    );
+}
+
+
+/* ================= SVG ================= */
+
+.connection - layer {
+    position: absolute;
+
+    inset: 0;
+
+    width: 100 %;
+    height: 100 %;
+
+    z - index: 1;
+
+    overflow: visible;
+
+    pointer - events: none;
+}
+
+
+.connection - line {
+    fill: none;
+
+    stroke: #31516e;
+
+    stroke - width: 2;
+
+    stroke - dasharray: 7 7;
+
+    opacity: 0.85;
+}
+
+
+.connection - line.active {
+    stroke: #36b8ff;
+
+    stroke - width: 3;
+
+    filter:
+    drop - shadow(
+        0 0 5px
+            rgba(54, 184, 255, 0.7)
+    );
+}
+
+
+/* ================= DEVICES ================= */
+
+.network - device {
+    position: absolute;
+
+    z - index: 5;
+
+    transform:
+    translate(-50 %, -50 %);
+
+    width: 100px;
+
+    text - align: center;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease;
+}
+
+
+.network - device:hover {
+    transform:
+    translate(-50 %, -50 %)
+    scale(1.06);
+}
+
+
+.device - circle {
+    width: 62px;
+    height: 62px;
+
+    margin: auto;
+
+    display: flex;
+    align - items: center;
+    justify - content: center;
+
+    border - radius: 18px;
+
+    background:
+    linear - gradient(
+        145deg,
+            #132a43,
+            #091727
+    );
+
+    border: 1px solid rgba(90, 180, 255, 0.3);
+
+    box - shadow:
+    0 12px 28px rgba(0, 0, 0, 0.35);
+
+    transition: 0.2s;
+}
+
+
+.network - device: hover.device - circle {
+    border - color: var(--cyan);
+
+    box - shadow:
+    0 0 25px rgba(54, 224, 255, 0.25);
+}
+
+
+.device - circle span {
+    font - size: 15px;
+    font - weight: 900;
+
+    letter - spacing: -0.5px;
+}
+
+
+.router.device - circle {
+    border - color: rgba(54, 194, 255, 0.5);
+}
+
+.router.device - circle span {
+    color: #54cfff;
+}
+
+
+.switch .device - circle {
+    border - color: rgba(190, 120, 255, 0.5);
+}
+
+.switch .device - circle span {
+    color: #c987ff;
+}
+
+
+.pc.device - circle {
+    border - color: rgba(53, 223, 139, 0.4);
+}
+
+.pc.device - circle span {
+    color: #54e4a0;
+}
+
+
+.server.device - circle {
+    border - color: rgba(255, 200, 87, 0.45);
+}
+
+.server.device - circle span {
+    color: #ffd06d;
+}
+
+
+.ap.device - circle {
+    border - color: rgba(255, 100, 135, 0.45);
+}
+
+.ap.device - circle span {
+    color: #ff7995;
+}
+
+
+.device - name {
+    margin - top: 8px;
+
+    font - size: 9px;
+    font - weight: 800;
+
+    letter - spacing: 0.8px;
+}
+
+
+.device - state {
+    display: flex;
+    align - items: center;
+    justify - content: center;
+
+    gap: 4px;
+
+    margin - top: 5px;
+
+    color: #71869e;
+
+    font - size: 7px;
+}
+
+
+.device - state span {
+    width: 5px;
+    height: 5px;
+
+    border - radius: 50 %;
+
+    background: var(--green);
+
+    box - shadow:
+    0 0 7px rgba(53, 223, 139, 0.8);
+}
+
+
+.network - device.offline.device - circle {
+    opacity: 0.35;
+
+    filter: grayscale(0.8);
+}
+
+
+.network - device.offline.device - state {
+    color: var(--red);
+}
+
+
+.network - device.offline.device - state span {
+    background: var(--red);
+
+    box - shadow: none;
+}
+
+
+/* ================= LINK LABEL ================= */
+
+.link - label {
+    position: absolute;
+
+    z - index: 3;
+
+    padding: 5px 9px;
+
+    color: #6d8aa7;
+
+    border: 1px solid var(--border);
+
+    border - radius: 6px;
+
+    background: #081522;
+
+    font - size: 7px;
+    font - weight: 800;
+
+    letter - spacing: 1px;
+}
+
+
+.label - router {
+    left: 50 %;
+
+    top: 21 %;
+
+    transform: translateX(-50 %);
+}
+
+
+.label -switch {
+    left: 50 %;
+
+    top: 52 %;
+
+    transform: translateX(-50 %);
+}
+
+
+    /* ================= DATA PACKET ================= */
+
+    .data - packet {
+    position: absolute;
+
+z - index: 10;
+
+width: 28px;
+height: 28px;
+
+display: none;
+
+align - items: center;
+justify - content: center;
+
+border - radius: 50 %;
+
+color: white;
+
+font - size: 5px;
+font - weight: 900;
+
+background:
+linear - gradient(
+    135deg,
+            #24c9ff,
+            #2378ff
+);
+
+box - shadow:
+0 0 20px rgba(40, 190, 255, 0.9);
+
+transform:
+translate(-50 %, -50 %);
+}
+
+
+/* ================= BOTTOM ================= */
+
+.bottom - area {
+    display: grid;
+
+    grid - template - columns:
+    1fr 1.6fr;
+
+    gap: 15px;
+
+    margin - top: 15px;
+}
+
+
+.legend,
+.event - log {
+    padding: 15px;
+
+    border: 1px solid var(--border);
+
+    border - radius: 12px;
+
+    background:
+    rgba(255, 255, 255, 0.02);
+}
+
+
+.legend - title {
+    display: block;
+
+    margin - bottom: 10px;
+
+    color: #69819a;
+
+    font - size: 8px;
+    font - weight: 800;
+
+    letter - spacing: 1px;
+}
+
+
+.legend - item {
+    display: inline - flex;
+
+    align - items: center;
+
+    gap: 6px;
+
+    margin - right: 15px;
+
+    color: #8193aa;
+
+    font - size: 8px;
+}
+
+
+.legend - line {
+    width: 25px;
+    height: 2px;
+
+    background: #42617e;
+}
+
+
+.legend - dot {
+    width: 7px;
+    height: 7px;
+
+    border - radius: 50 %;
+
+    background: var(--green);
+}
+
+
+.legend - packet {
+    width: 8px;
+    height: 8px;
+
+    border - radius: 50 %;
+
+    background: var(--cyan);
+
+    box - shadow:
+    0 0 8px var(--cyan);
+}
+
+
+.log - header {
+    display: flex;
+
+    align - items: center;
+    justify - content: space - between;
+
+    margin - bottom: 8px;
+}
+
+
+.log - header strong {
+    font - size: 8px;
+
+    letter - spacing: 1px;
+}
+
+
+.log - header button {
+    padding: 4px 7px;
+
+    color: #69819a;
+
+    border: 1px solid var(--border);
+
+    border - radius: 5px;
+
+    background: transparent;
+
+    cursor: pointer;
+
+    font - size: 7px;
+}
+
+
+.log - content {
+    max - height: 45px;
+
+    overflow - y: auto;
+}
+
+
+.log - item {
+    display: flex;
+
+    gap: 10px;
+
+    color: #71869d;
+
+    font - size: 8px;
+
+    line - height: 1.6;
+}
+
+
+.log - time {
+    color: var(--cyan);
+}
+
+
+/* ================= EMPTY ================= */
+
+.empty - message {
+    position: absolute;
+
+    display: none;
+
+    top: 50 %;
+    left: 50 %;
+
+    transform: translate(-50 %, -50 %);
+
+    color: #6f8298;
+
+    font - size: 12px;
+}
+
+
+/* ================= DETAIL OVERLAY ================= */
+
+.detail - overlay {
+    position: fixed;
+
+    z - index: 100;
+
+    inset: 0;
+
+    display: none;
+
+    align - items: center;
+    justify - content: flex - end;
+
+    padding: 20px;
+
+    background:
+    rgba(0, 0, 0, 0.45);
+
+    backdrop - filter: blur(4px);
+}
+
+
+.detail - overlay.show {
+    display: flex;
+}
+
+
+.detail - panel {
+    position: relative;
+
+    width: min(420px, 100 %);
+
+    max - height: 90vh;
+
+    overflow - y: auto;
+
+    padding: 28px;
+
+    border: 1px solid rgba(80, 180, 255, 0.18);
+
+    border - radius: 20px;
+
+    background:
+    linear - gradient(
+        145deg,
+            #0d2035,
+            #081522
+    );
+
+    box - shadow:
+    0 30px 80px rgba(0, 0, 0, 0.55);
+
+    animation:
+        panelIn 0.25s ease;
+}
+
+
+@keyframes panelIn {
+
+    from {
+        opacity: 0;
+        transform:
+        translateX(30px)
+        scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform:
+        translateX(0)
+        scale(1);
+    }
+}
+
+
+.close - detail {
+    position: absolute;
+
+    top: 15px;
+    right: 15px;
+
+    width: 30px;
+    height: 30px;
+
+    color: #9aacc0;
+
+    border: 1px solid var(--border);
+
+    border - radius: 8px;
+
+    background: rgba(255, 255, 255, 0.03);
+
+    cursor: pointer;
+
+    font - size: 20px;
+}
+
+
+.close - detail:hover {
+    color: white;
+
+    background: rgba(255, 255, 255, 0.08);
+}
+
+
+.detail - icon {
+    width: 65px;
+    height: 65px;
+
+    display: flex;
+    align - items: center;
+    justify - content: center;
+
+    margin - bottom: 18px;
+
+    border - radius: 18px;
+
+    color: var(--cyan);
+
+    border: 1px solid rgba(54, 224, 255, 0.3);
+
+    background: rgba(54, 224, 255, 0.05);
+
+    font - size: 17px;
+    font - weight: 900;
+}
+
+
+.detail - heading > span {
+    color: #68819a;
+
+    font - size: 8px;
+    font - weight: 800;
+
+    letter - spacing: 1.5px;
+}
+
+
+.detail - heading h2 {
+    margin - top: 4px;
+
+    font - size: 26px;
+}
+
+
+.detail - status {
+    display: inline - flex;
+
+    align - items: center;
+
+    gap: 6px;
+
+    margin - top: 8px;
+
+    color: var(--green);
+
+    font - size: 9px;
+    font - weight: 800;
+}
+
+
+.detail - status span {
+    width: 7px;
+    height: 7px;
+
+    border - radius: 50 %;
+
+    background: var(--green);
+
+    box - shadow:
+    0 0 9px var(--green);
+}
+
+
+.detail - grid {
+    display: grid;
+
+    grid - template - columns:
+    repeat(2, 1fr);
+
+    gap: 8px;
+
+    margin - top: 25px;
+}
+
+
+.detail - card {
+    padding: 12px;
+
+    border: 1px solid var(--border);
+
+    border - radius: 10px;
+
+    background: rgba(255, 255, 255, 0.025);
+}
+
+
+.detail - card small {
+    display: block;
+
+    color: #5d7590;
+
+    font - size: 7px;
+}
+
+
+.detail - card strong {
+    display: block;
+
+    margin - top: 6px;
+
+    font - size: 10px;
+
+    word -break: break-word;
+}
+
+
+.detail - description {
+    margin - top: 20px;
+
+    padding - top: 18px;
+
+    border - top: 1px solid var(--border);
+}
+
+
+.detail - description span {
+    color: #69819a;
+
+    font - size: 8px;
+    font - weight: 800;
+
+    letter - spacing: 1px;
+}
+
+
+.detail - description p {
+    margin - top: 8px;
+
+    color: #91a3b7;
+
+    font - size: 10px;
+
+    line - height: 1.7;
+}
+
+
+.detail - actions {
+    display: flex;
+
+    gap: 8px;
+
+    margin - top: 22px;
+}
+
+
+.detail - button {
+    flex: 1;
+
+    padding: 11px;
+
+    color: #a8b9ca;
+
+    border: 1px solid var(--border);
+
+    border - radius: 8px;
+
+    background: rgba(255, 255, 255, 0.03);
+
+    cursor: pointer;
+
+    font - size: 9px;
+    font - weight: 800;
+}
+
+
+.detail - button:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+
+.primary - detail {
+    color: white;
+
+    border: none;
+
+    background:
+    linear - gradient(
+        135deg,
+            #1478ff,
+            #18c9ee
+    );
+}
+
+
+/* ================= RESPONSIVE ================= */
+
+@media(max - width: 1000px) {
+
+    .sidebar {
+        width: 220px;
+    }
+
+    .workspace {
+        padding: 20px;
+    }
+
+    .network - canvas {
+        min - height: 530px;
+    }
+}
+
+
+@media(max - width: 760px) {
+
+    .app {
+        flex - direction: column;
+    }
+
+    .sidebar {
+        width: 100 %;
+
+        border - right: none;
+        border - bottom: 1px solid var(--border);
+    }
+
+    .device - list {
+        display: grid;
+
+        grid - template - columns:
+        repeat(3, 1fr);
+    }
+
+    .network - info {
+        display: none;
+    }
+
+    .workspace - header {
+        flex - direction: column;
+
+        gap: 15px;
+    }
+
+    .bottom - area {
+        grid - template - columns: 1fr;
+    }
+
+    .network - canvas {
+        min - height: 520px;
+    }
+}
+
+
+@media(max - width: 500px) {
+
+    .topbar {
+        padding: 0 15px;
+    }
+
+    .brand h1 {
+        font - size: 12px;
+    }
+
+    .header - status {
+        display: none;
+    }
+
+    .workspace {
+        padding: 12px;
+    }
+
+    .device - list {
+        grid - template - columns:
+        repeat(2, 1fr);
+    }
+
+    .network - canvas {
+        min - height: 500px;
+    }
+
+    .detail - panel {
+        padding: 22px;
+    }
+}
